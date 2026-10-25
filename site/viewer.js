@@ -11,20 +11,20 @@ const Viewer = (() => {
 
   // Assembled depth of each layer and how far it travels when exploded.
   const LAYERS = {
-    frame:       { d: 0,    off: 0,   label: 'Frame' },
-    faceplate:   { d: 0,    off: 0,   label: 'Faceplate' },
-    splines:     { d: 0,    off: 22,  label: 'Splines' },
-    diffuser:    { d: 2.55, off: 48,  label: 'Diffuser film' },
-    grid:        { d: 2.6,  off: 84,  label: 'Light grid' },
-    leds:        { d: 20.6, off: 132, label: 'LED rows' },
-    panel:       { d: 20.6, off: 160, label: 'Back panel' },
-    electronics: { d: 24.6, off: 196, label: 'Electronics' },
-    rearcover:   { d: 38,   off: 246, label: 'Rear cover' },
+    frame:       { d: 0,    off: 0 },
+    faceplate:   { d: 0,    off: 0 },
+    splines:     { d: 0,    off: 22 },
+    diffuser:    { d: 2.55, off: 48 },
+    grid:        { d: 2.6,  off: 84 },
+    leds:        { d: 20.6, off: 132 },
+    panel:       { d: 20.6, off: 160 },
+    electronics: { d: 24.6, off: 196 },
+    rearcover:   { d: 38,   off: 246 },
   };
   const TILE_DIR = { TL: [-1, 1], TR: [1, 1], BL: [-1, -1], BR: [1, -1] };
 
-  let THREE_ = null, renderer, scene, camera, controls, host, labelsEl, tipEl;
-  let dirty = true, explode = 0.6, colourMode = 'status', lit = false, time = [12, 0];
+  let renderer, scene, camera, controls, host, tipEl;
+  let dirty = true, explode = 0.6, lit = false, time = [12, 0];
   let hovered = null, selected = null, tween = null, onSelect = () => {}, onHover = () => {};
   const parts = {};          // partId → {group, layer, tile, meshes: [{mesh, natural, status}]}
   const layerGroups = {};    // layer → THREE.Group
@@ -41,7 +41,7 @@ const Viewer = (() => {
   function readTokens() {
     C.bg = css('--viewer-bg');
     C.buy = css('--st-buy'); C.print = css('--st-print'); C.build = css('--st-build');
-    C.led = css('--led');
+    C.led = '#ffbe78';   // the firmware's CRGB(255,190,120), whatever the theme
   }
 
   function woodTexture(base, grain, w = 512, h = 512, lines = 90) {
@@ -272,7 +272,7 @@ const Viewer = (() => {
 
   function applyStatuses() {
     for (const [id, p] of Object.entries(parts)) {
-      const st = (colourMode === 'real' || lit) ? 'done' : (statuses[id] || 'buy');
+      const st = lit ? 'done' : (statuses[id] || 'buy');
       for (const m of p.meshes) {
         if (m.statusKey !== st) {
           if (m.mesh.material !== m.natural && m.mesh.material.dispose) m.mesh.material.dispose();
@@ -315,62 +315,10 @@ const Viewer = (() => {
     applyStatuses();
   }
 
-  // ---------------------------------------------------------------- labels
-  const LABEL_LAYERS = ['faceplate', 'splines', 'diffuser', 'grid', 'leds', 'panel', 'electronics', 'rearcover'];
-  const FAMILY_OF_LAYER = { faceplate: 'faceplate', splines: 'splines', diffuser: 'diffuser', grid: 'lightgrid',
-    leds: 'leds', panel: 'panel', electronics: 'electronics', rearcover: 'rearcover' };
-  const labelEls = {};
-  function buildLabels() {
-    for (const name of LABEL_LAYERS) {
-      const el = document.createElement('button');
-      el.className = 'v-label';
-      el.type = 'button';
-      el.innerHTML = `<span class="v-dot"></span>${LAYERS[name].label}`;
-      el.addEventListener('click', () => onSelect({ family: FAMILY_OF_LAYER[name] }));
-      labelsEl.appendChild(el);
-      labelEls[name] = el;
-    }
-  }
-  const v3 = () => new THREE.Vector3();
-  const tmpV = v3();
-  function placeLabels() {
-    const show = explode > 0.25;
-    labelsEl.classList.toggle('on', show);
-    if (!show) return;
-    const w = host.clientWidth, h = host.clientHeight;
-    // anchor each label on the layer's top-right corner, then push labels
-    // apart vertically so they never sit on top of each other
-    const pos = LABEL_LAYERS.map(name => {
-      tmpV.set(HALF, HALF, layerGroups[name].position.z).project(camera);
-      return { name, x: (tmpV.x * 0.5 + 0.5) * w + 10, y: (-tmpV.y * 0.5 + 0.5) * h, behind: tmpV.z > 1 };
-    }).sort((a, b) => a.y - b.y);
-    const gap = 26;
-    for (let i = 1; i < pos.length; i++) pos[i].y = Math.max(pos[i].y, pos[i - 1].y + gap);
-    const over = pos.length ? pos[pos.length - 1].y - (h - 50) : 0;
-    if (over > 0) for (const p of pos) p.y -= over;
-    for (const p of pos) {
-      const el = labelEls[p.name];
-      const x = Math.min(p.x, w - el.offsetWidth - 8);
-      el.style.transform = `translate(${x}px, ${Math.max(8, p.y)}px) translate(0, -50%)`;
-      el.hidden = p.behind;
-      el.dataset.status = layerStatus(p.name);
-    }
-  }
-  function layerStatus(layer) {
-    const order = ['buy', 'print', 'build', 'done'];
-    let worst = 'done';
-    for (const [id, p] of Object.entries(parts)) {
-      if (p.layer !== layer) continue;
-      const s = statuses[id] || 'buy';
-      if (order.indexOf(s) < order.indexOf(worst)) worst = s;
-    }
-    return worst;
-  }
-
   // ---------------------------------------------------------------- camera
   // direction from the target to the camera; the distance is fitted
   const VIEWS = {
-    iso:   { dir: [0.66, 0.36, 0.66], target: [0, -6, -100], r: 300 },
+    iso:   { dir: [0.66, 0.36, 0.66], target: [0, -6, -100], r: 270 },
     front: { dir: [0, 0, 1], target: [0, 0, -20], r: 225 },
     back:  { dir: [0, 0.08, -1], target: [0, 0, -60], r: 225 },
     side:  { dir: [1, 0.12, 0.03], target: [0, 0, -120], r: 250 },
@@ -419,7 +367,6 @@ const Viewer = (() => {
     if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
     else renderer.outputEncoding = THREE.sRGBEncoding;
     host.prepend(renderer.domElement);
-    labelsEl = host.querySelector('.v-labels');
     tipEl = host.querySelector('.v-tip');
 
     scene = new THREE.Scene();
@@ -445,7 +392,6 @@ const Viewer = (() => {
       scene.add(layerGroups[name]);
     }
     buildProcedural();
-    buildLabels();
     layout();
 
     const resize = () => {
@@ -495,7 +441,7 @@ const Viewer = (() => {
         if (k >= 1) explodeTween = null;
       }
       controls.update();
-      if (dirty) { renderer.render(scene, camera); placeLabels(); dirty = false; }
+      if (dirty) { renderer.render(scene, camera); dirty = false; }
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
@@ -517,7 +463,6 @@ const Viewer = (() => {
     setExplode,
     getExplode: () => explode,
     setStatuses(map) { statuses = map; applyStatuses(); },
-    setColourMode(m) { colourMode = m; applyStatuses(); },
     setLit(on) { lit = on; applyLight(); },
     setTime(h, m) { time = [h, m]; if (lit) applyLight(); },
     select(id) { selected = id; highlight(); },

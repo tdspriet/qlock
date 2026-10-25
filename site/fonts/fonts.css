@@ -7,13 +7,6 @@
   src: url(archivo-0.woff2) format('woff2');
 }
 @font-face {
-  font-family: 'Big Shoulders Stencil Display';
-  font-style: normal;
-  font-weight: 600 800;
-  font-display: swap;
-  src: url(big-shoulders-stencil-display-1.woff2) format('woff2');
-}
-@font-face {
   font-family: 'IBM Plex Mono';
   font-style: normal;
   font-weight: 400;

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>QLOCK Build</title>
-<meta name="description" content="Progress tracker for a 3D-printed Dutch word clock: plan, parts, shopping list and reference.">
+<title>QLOCK</title>
+<meta name="description" content="Build tracker for a 3D-printed Dutch word clock.">
 <meta name="color-scheme" content="dark light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23131211'/%3E%3Cg fill='%23ffbe78'%3E%3Crect x='6' y='7' width='5' height='5'/%3E%3Crect x='13.5' y='7' width='5' height='5'/%3E%3Crect x='21' y='7' width='5' height='5'/%3E%3C/g%3E%3Cg fill='%233a3631'%3E%3Crect x='6' y='14' width='5' height='5'/%3E%3Crect x='13.5' y='14' width='5' height='5'/%3E%3Crect x='21' y='14' width='5' height='5'/%3E%3Crect x='6' y='21' width='5' height='5'/%3E%3C/g%3E%3Cg fill='%23ffbe78'%3E%3Crect x='13.5' y='21' width='5' height='5'/%3E%3Crect x='21' y='21' width='5' height='5'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -13,137 +13,79 @@
 <body>
 
 <header class="top">
-  <div class="top-inner">
-    <div class="brand">
-      <div class="mini-face" id="mini-face" aria-hidden="true"></div>
-      <div class="brand-text">
-        <h1>QLOCK</h1>
-        <p class="sub">Dutch word clock · 376 × 376 mm · 110 letters</p>
-        <p class="phrase" id="phrase" aria-live="off"></p>
-      </div>
-    </div>
-    <div class="stats" id="stats"></div>
+  <div class="face" id="face" aria-hidden="true"></div>
+  <div class="title">
+    <h1>QLOCK</h1>
+    <p class="summary" id="summary"></p>
+    <div class="bar" aria-hidden="true"><i id="summary-bar"></i></div>
   </div>
 </header>
 
 <div class="banner" id="banner" hidden></div>
 
 <main class="bench">
-  <!-- left: the plan -->
   <section class="col col-plan" aria-labelledby="plan-h">
     <div class="col-head">
-      <h2 id="plan-h">Next steps</h2>
-      <span class="col-meta" id="plan-meta"></span>
+      <h2 id="plan-h">Plan</h2>
+      <span class="muted num" id="plan-count"></span>
     </div>
-    <div class="next" id="next"></div>
-    <div class="phases" id="phases"></div>
+    <div id="phases"></div>
   </section>
 
-  <!-- centre: the model -->
   <section class="col col-model" aria-labelledby="model-h">
     <div class="col-head">
-      <h2 id="model-h">The clock</h2>
-      <span class="col-meta">Drag to orbit · scroll to zoom · click a part</span>
-    </div>
-
-    <div class="toolbar" role="toolbar" aria-label="3D view">
-      <div class="seg" id="seg-colour" role="radiogroup" aria-label="Colour by">
-        <button type="button" data-v="status" role="radio">Status</button>
-        <button type="button" data-v="real" role="radio">Real</button>
+      <h2 id="model-h">Clock</h2>
+      <div class="controls">
+        <button type="button" class="btn" id="btn-explode" aria-pressed="true">Explode</button>
+        <button type="button" class="btn" id="btn-lit" aria-pressed="false">Light up</button>
+        <button type="button" class="btn icon" id="btn-reset" aria-label="Reset view" title="Reset view">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6M3 2.5v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
-      <div class="seg" id="seg-explode" role="radiogroup" aria-label="Assembly">
-        <button type="button" data-v="0" role="radio">Assembled</button>
-        <button type="button" data-v="1" role="radio">Exploded</button>
-      </div>
-      <div class="seg" id="seg-view" aria-label="Camera">
-        <button type="button" data-v="iso">3/4</button>
-        <button type="button" data-v="front">Front</button>
-        <button type="button" data-v="side">Side</button>
-        <button type="button" data-v="back">Back</button>
-      </div>
-      <button type="button" class="btn-lit" id="btn-lit" aria-pressed="false">
-        <span class="lit-dot"></span>Light it up
-      </button>
     </div>
 
     <div class="viewer" id="viewer">
-      <div class="v-labels"></div>
       <div class="v-tip" id="v-tip" hidden></div>
-      <div class="v-legend" id="v-legend"></div>
-      <div class="v-load" id="v-load">Loading parts…</div>
+      <div class="v-legend" id="v-legend">
+        <span><i class="dot st-buy"></i>To buy</span>
+        <span><i class="dot st-print"></i>To print</span>
+        <span><i class="dot st-build"></i>To build</span>
+      </div>
+      <div class="v-load" id="v-load">Loading…</div>
       <div class="v-time" id="v-time" hidden>
-        <label for="lit-time">Time</label>
-        <input type="time" id="lit-time" step="300">
+        <input type="time" id="lit-time" step="300" aria-label="Time shown">
         <button type="button" id="lit-now">Now</button>
       </div>
       <aside class="v-card" id="v-card" hidden></aside>
     </div>
-    <div class="explode-row">
-      <label for="explode">Explode</label>
-      <input type="range" id="explode" min="0" max="1" step="0.01" value="0.6">
-    </div>
 
-    <div class="board-head">
-      <h3>Parts</h3>
-      <span class="col-meta" id="board-meta"></span>
-    </div>
-    <div class="board" id="board"></div>
+    <div class="todo" id="todo"></div>
   </section>
 
-  <!-- right: shopping -->
   <section class="col col-shop" aria-labelledby="shop-h">
     <div class="col-head">
-      <h2 id="shop-h">Shopping list</h2>
-      <span class="col-meta" id="shop-meta"></span>
+      <h2 id="shop-h">Shopping</h2>
+      <span class="muted num" id="shop-left"></span>
     </div>
-    <div class="budget" id="budget"></div>
-    <div class="seg seg-small" id="seg-shopfilter" role="radiogroup" aria-label="Show">
-      <button type="button" data-v="need" role="radio">To get</button>
-      <button type="button" data-v="all" role="radio">All</button>
-      <button type="button" data-v="got" role="radio">Sorted</button>
-    </div>
-    <div class="shop" id="shop"></div>
-    <form class="add-shop" id="add-shop" autocomplete="off">
-      <h3>Add something</h3>
-      <input id="add-shop-name" placeholder="What" required maxlength="120">
-      <div class="add-row">
-        <input id="add-shop-price" type="number" min="0" step="0.01" placeholder="€ each" inputmode="decimal">
-        <input id="add-shop-qty" type="number" min="1" step="1" value="1" aria-label="Quantity">
-        <select id="add-shop-group" aria-label="Group">
-          <option value="electronics">Electronics</option>
-          <option value="materials">Materials</option>
-          <option value="tools">Tools</option>
-        </select>
-      </div>
-      <input id="add-shop-url" type="url" placeholder="Link (optional)">
-      <button type="submit">Add to list</button>
+    <div id="shop"></div>
+    <button type="button" class="add-link" id="add-item-open">+ Add item</button>
+    <form class="add-item" id="add-item" autocomplete="off" hidden>
+      <input id="add-item-name" placeholder="Item" required maxlength="120" aria-label="Item">
+      <input id="add-item-price" type="number" min="0" step="0.01" placeholder="€" inputmode="decimal" aria-label="Price">
+      <button type="submit">Add</button>
     </form>
   </section>
 </main>
 
-<section class="ref" id="reference" aria-labelledby="ref-h">
-  <div class="ref-inner">
-    <div class="ref-head">
-      <h2 id="ref-h">Reference</h2>
-      <div class="tabs" role="tablist" id="tabs">
-        <button type="button" role="tab" data-tab="leds">Face &amp; LEDs</button>
-        <button type="button" role="tab" data-tab="wiring">Wiring</button>
-        <button type="button" role="tab" data-tab="print">Printing</button>
-        <button type="button" role="tab" data-tab="firmware">Firmware</button>
-        <button type="button" role="tab" data-tab="rules">Don’t forget</button>
-        <button type="button" role="tab" data-tab="log">Build log</button>
-      </div>
-    </div>
-    <div class="tab-panels" id="tab-panels"></div>
+<section class="ref" id="reference" aria-label="Reference">
+  <div class="tabs" role="tablist" id="tabs">
+    <button type="button" role="tab" data-tab="wiring">Wiring</button>
+    <button type="button" role="tab" data-tab="leds">LEDs</button>
+    <button type="button" role="tab" data-tab="print">Printing</button>
+    <button type="button" role="tab" data-tab="firmware">Firmware</button>
   </div>
+  <div id="tab-panel" role="tabpanel"></div>
 </section>
-
-<footer class="foot">
-  <div class="foot-inner">
-    <p>Run <code>python3 site/serve.py</code> from the project folder to save progress to <code>site/progress.json</code>. Add <code>--lan</code> to open it on your phone.</p>
-    <p>Plan, dimensions and wiring come from <code>README.md</code>; printed parts are the live files in <code>stl/</code>.</p>
-  </div>
-</footer>
 
 <script src="vendor/three.min.js"></script>
 <script src="vendor/OrbitControls.js"></script>
