@@ -138,6 +138,13 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
 
+class Server(ThreadingHTTPServer):
+    # The default backlog of 5 resets connections on macOS when a page load
+    # opens more at once (scripts, fonts, a dozen STLs).
+    request_queue_size = 64
+    daemon_threads = True
+
+
 def lan_ip():
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -158,7 +165,7 @@ def main():
     host = "0.0.0.0" if args.lan else "127.0.0.1"
     handler = partial(Handler, directory=str(ROOT))
     try:
-        server = ThreadingHTTPServer((host, args.port), handler)
+        server = Server((host, args.port), handler)
     except OSError:
         sys.exit(f"Port {args.port} is busy. Try: python3 site/serve.py --port {args.port + 1}")
 

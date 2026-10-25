@@ -46,19 +46,20 @@
   let now = new Date();
   function renderFace() {
     now = new Date();
-    const { lit } = CLOCK.at(now.getHours(), now.getMinutes());
-    $('#face').innerHTML = LETTERS.map((row, r) => [...row].map((ch, c) =>
-      `<span${lit.has(r * 11 + c) ? ' class="on"' : ''}>${ch}</span>`).join('')).join('');
+    const { lit, phrase } = CLOCK.at(now.getHours(), now.getMinutes());
+    $('#face').innerHTML = LETTERS.map((row, r) => [...row].map((_, c) =>
+      `<i${lit.has(r * 11 + c) ? ' class="on"' : ''}></i>`).join('')).join('');
+    $('#face').title = phrase;
   }
 
   function renderSummary() {
     const tasks = allTasks(), done = tasks.filter(taskDone).length;
     const toBuy = shopItems().filter(i => shopStatus(i) === 'need').reduce((a, i) => a + i.price * i.qty, 0);
     const printLeft = PARTS.filter(p => p.kind === 'print' && !printed(p)).reduce((a, p) => a + (PRINT_INFO[p.id]?.min || 0), 0);
-    const bits = [`${done} of ${tasks.length} steps done`];
+    const bits = [`${done} of ${tasks.length} steps`];
     if (toBuy) bits.push(`${euro(toBuy, 0)} to buy`);
-    if (printLeft) bits.push(`${hours(printLeft)} of printing`);
-    $('#summary').textContent = bits.join(' · ');
+    if (printLeft) bits.push(`${hours(printLeft)} printing`);
+    $('#summary').textContent = bits.map(b => b.replace(/ /g, '\u00a0')).join(' · ');
     $('#summary-bar').style.width = `${tasks.length ? done / tasks.length * 100 : 0}%`;
   }
 
@@ -89,9 +90,8 @@
   }
 
   function renderPlan() {
-    const ps = phases(), tasks = ps.flatMap(p => p.tasks);
+    const ps = phases();
     const current = ps.find(p => p.tasks.some(t => !taskDone(t)));
-    $('#plan-count').textContent = `${tasks.filter(taskDone).length}/${tasks.length}`;
     $('#phases').innerHTML = ps.map(p => {
       const d = p.tasks.filter(taskDone).length, n = p.tasks.length;
       const open = !closedPhases.has(p.id) && (openPhases.has(p.id) || p === current);
@@ -169,14 +169,13 @@
 
   function renderShop() {
     const items = shopItems();
-    const left = items.filter(i => shopStatus(i) === 'need').reduce((a, i) => a + i.price * i.qty, 0);
-    $('#shop-left').textContent = left ? `${euro(left, 0)} left` : 'All sorted';
     $('#shop').innerHTML = SHOP_GROUPS.map(g => {
       const all = items.filter(i => i.group === g.id);
       const need = all.filter(i => !sorted(shopStatus(i))), rest = all.filter(i => sorted(shopStatus(i)));
       const tt = need.filter(i => i.shop === 'TinyTronics');
+      const left = all.filter(i => shopStatus(i) === 'need').reduce((a, i) => a + i.price * i.qty, 0);
       return `<section class="group" data-group="${g.id}">
-        <div class="group-h"><h3>${esc(g.name)}</h3>${tt.length > 1 ? `<button type="button" class="copy" data-copy="${g.id}">Copy TinyTronics list</button>` : ''}</div>
+        <div class="group-h"><h3>${esc(g.name)}${left ? `<span class="num">${euro(left, 0)}</span>` : ''}</h3>${tt.length > 1 ? `<button type="button" class="copy" data-copy="${g.id}">Copy TinyTronics list</button>` : ''}</div>
         <ul class="items">${[...need, ...rest].map(itemRow).join('')}</ul>
       </section>`;
     }).join('');
@@ -226,15 +225,26 @@
   // ---------------------------------------------------------------- clock
   let selection = null, lit = false, litTime = null, exploded = true;
 
+  // Faceplate TL TR BL BR rather than four rows: tiles and test samples are
+  // folded under one label, each still its own button.
+  const partLabel = p => p.tile ? p.tile : p.test ? p.name.replace(/ sample$/, '') : p.name;
   function renderTodo() {
     const by = { buy: [], print: [], build: [], done: [] };
     PARTS.forEach(p => by[partStatus(p)].push(p));
-    const col = k => `<div>
-      <h3><i class="dot st-${k}"></i>${k === 'buy' ? 'To buy' : k === 'print' ? 'To print' : 'To build'} <span class="num">${by[k].length}</span></h3>
-      ${by[k].length ? `<ul>${by[k].map(p => `<li><button type="button" data-part="${p.id}" class="${selection === p.id ? 'sel' : ''}">${esc(p.name)}</button></li>`).join('')}</ul>` : '<p class="none">Nothing</p>'}
-    </div>`;
-    $('#todo').innerHTML = col('buy') + col('print') + col('build') +
-      (by.done.length ? `<p class="todo-done">Done: ${by.done.map(p => esc(p.name)).join(', ')}</p>` : '');
+    const btn = p => `<button type="button" data-part="${p.id}" class="${selection === p.id ? 'sel' : ''}" aria-label="${esc(p.name)}">${esc(partLabel(p))}</button>`;
+    const row = k => {
+      const groups = [];
+      by[k].forEach(p => {
+        const key = p.tile ? p.family : p.test ? 'test' : p.id;
+        const g = groups.find(x => x.key === key);
+        if (g) g.parts.push(p);
+        else groups.push({ key, label: p.tile ? p.name.replace(/ \w\w$/, '') : p.test ? 'Samples' : null, parts: [p] });
+      });
+      const list = groups.map(g => `<li>${g.label ? `<span>${esc(g.label)}</span>` : ''}${g.parts.map(btn).join('')}</li>`).join('');
+      return `<h3><i class="dot st-${k}"></i>${STATUS[k][0].toUpperCase() + STATUS[k].slice(1)} <span class="num">${by[k].length}</span></h3>
+        ${list ? `<ul>${list}</ul>` : '<p class="none">—</p>'}`;
+    };
+    $('#todo').innerHTML = row('buy') + row('print') + row('build');
   }
 
   function stepItem(st) {
@@ -289,7 +299,6 @@
       lit = !lit;
       btnLit.setAttribute('aria-pressed', lit);
       $('#v-time').hidden = !lit;
-      $('#v-legend').hidden = lit;
       Viewer.setLit(lit);
       if (lit) { explodedBeforeLit = exploded; setExploded(false); Viewer.view('front'); setLitTime(); }
       else { setExploded(explodedBeforeLit); Viewer.view('iso'); }
@@ -343,8 +352,9 @@
   }
   const statusMap = () => Object.fromEntries(PARTS.map(p => [p.id, partStatus(p)]));
 
-  // ---------------------------------------------------------------- reference
-  let tab = pref.get('tab', 'wiring');
+  // ---------------------------------------------------------------- sections
+  // Build plus four reference views, chosen in the header; the hash keeps the
+  // view across a reload.
   let ledSide = 'front';
 
   function tabWiring() {
@@ -356,8 +366,9 @@
     ];
     const name = n => n.endsWith('OE') ? `${n[0]}<span class="ol">OE</span>` : n;
     const row = p => `<tr><td class="pn">${p[0]}</td><td class="pname">${name(p[1])}</td><td class="${p[3] ? '' : 'nc'}">${p[3] ? `<i class="wire ${p[3]}"></i>` : ''}${esc(p[2])}</td></tr>`;
-    return `<div class="diagram">${WIRING_SVG}</div>
-      <div class="ref-grid" style="margin-top:28px">
+    return `<div class="ref-grid ref-wiring">
+      <div class="diagram">${WIRING_SVG}</div>
+      <div class="stack">
         <div>
           <h3>SN74AHCT125N pins</h3>
           <table class="pins"><tbody>${pins.map(row).join('')}</tbody></table>
@@ -365,13 +376,14 @@
         <div class="warn-box">
           <h3>Flashing over USB</h3>
           <ol class="steps-ol">
-            <li>Switch the clock off and unplug the whole ESP32 harness.</li>
-            <li>Connect USB to the bare ESP32 and upload.</li>
+            <li>Switch off and unplug the ESP32 harness.</li>
+            <li>Plug USB into the bare ESP32 and upload.</li>
             <li>Unplug USB, reconnect the harness, switch on.</li>
           </ol>
-          <p>Switching off doesn’t isolate VIN from the strip. Once it’s closed up, update over Wi-Fi.</p>
+          <p>The switch doesn’t isolate VIN from the strip. Once it’s closed up, update over Wi-Fi.</p>
         </div>
-      </div>`;
+      </div>
+    </div>`;
   }
 
   function tabLeds() {
@@ -385,19 +397,19 @@
       }
       cells += `<span class="dir">${(r % 2 === 0) !== back ? '→' : '←'}</span>`;
     }
-    return `<div class="ref-grid">
+    return `<div class="ref-grid ref-leds">
       <div>
         <div class="leds-tools" role="group" aria-label="Seen from">
           <button type="button" data-side="front" aria-pressed="${!back}">From the front</button>
           <button type="button" data-side="back" aria-pressed="${back}">From the back</button>
         </div>
         <div class="ledface">${cells}</div>
-        <p class="led-key">Small numbers are the LED order along the strip. <i></i>Power is fed in at LEDs 0, 55 and 109.</p>
+        <p class="led-key">Small numbers: order along the strip. <i></i>Power goes in at LEDs 0, 55 and 109.</p>
       </div>
       <div>
         <h3>Marking the panel</h3>
         <dl class="specs">
-          <dt>First LED</dt><dd>21.33 mm from the left, 30.5 mm from the top (seen from the front)</dd>
+          <dt>First LED</dt><dd>21.33 mm from the left, 30.5 mm from the top, seen from the front</dd>
           <dt>Spacing</dt><dd>33.333 mm across, 35 mm down</dd>
           <dt>Tolerance</dt><dd>±1 mm up/down, or the grid won’t seat</dd>
           <dt>Strip run</dt><dd>366.7 mm in a 368 mm gap</dd>
@@ -426,7 +438,7 @@
           <tbody>${rows}</tbody>
           <tfoot><tr><td colspan="2">Clock parts, without tests</td><td class="r">${g} g</td><td class="r">${hours(m)}</td><td></td></tr></tfoot>
         </table></div>
-        <p class="fine">Sliced in CuraEngine 5.13 with the settings on the right, 20 % infill, without heat-up.</p>
+        <p class="fine">CuraEngine 5.13 slice with these settings, without heat-up.</p>
       </div>
       <div>
         <h3>Cura, Ultimaker 3</h3>
@@ -450,7 +462,7 @@
         <ul class="signals">
           <li><i class="sig" style="background:#ff4a3d"></i><div><b>Three red blinks at boot</b>Should be the H of HET, top left from the front. If not, flip <code>SERPENTINE_STARTS_LEFT</code> or <code>_TOP</code> and reflash.</div></li>
           <li><i class="sig" style="background:#d08327"></i><div><b>Amber pulse on the first LED</b>No time yet: check the Wi-Fi details.</div></li>
-          <li><i class="sig" style="background:#9a5ad0"></i><div><b>HET IS in violet</b>No time sync for 26 hours; it may be drifting.</div></li>
+          <li><i class="sig" style="background:#9a5ad0"></i><div><b>HET IS in violet</b>No time sync for 26 hours; it may drift.</div></li>
           <li><i class="sig" style="background:var(--accent)"></i><div><b>Warm white</b>Normal. Dims from 23:00 to 07:00.</div></li>
         </ul>
       </div>
@@ -468,22 +480,41 @@
   }
 
   const TABS = { wiring: tabWiring, leds: tabLeds, print: tabPrint, firmware: tabFirmware };
-  function renderRef() {
-    if (!TABS[tab]) tab = 'wiring';
-    $$('#tabs [role=tab]').forEach(b => { b.setAttribute('aria-selected', b.dataset.tab === tab); b.tabIndex = b.dataset.tab === tab ? 0 : -1; });
-    $('#tab-panel').innerHTML = TABS[tab]();
+  const VIEWS = ['build', ...Object.keys(TABS)];
+  const viewFromHash = () => { const v = location.hash.slice(1); return VIEWS.includes(v) ? v : 'build'; };
+  let view = viewFromHash();
+
+  function renderView() {
+    $$('#views [role=tab]').forEach(b => { b.setAttribute('aria-selected', b.dataset.view === view); b.tabIndex = b.dataset.view === view ? 0 : -1; });
+    $('#view-build').hidden = view !== 'build';
+    $('#view-ref').hidden = view === 'build';
+    if (view !== 'build') renderRef();
   }
-  function bindRef() {
-    $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) { tab = b.dataset.tab; pref.set('tab', tab); renderRef(); } });
-    $('#tabs').addEventListener('keydown', e => {
+  function renderRef() {
+    const panel = $('#view-ref');
+    panel.setAttribute('aria-label', $(`#views [data-view="${view}"]`).textContent);
+    panel.innerHTML = TABS[view]();
+  }
+  function setView(v) {
+    if (v === view) return;
+    view = v;
+    history.replaceState(null, '', v === 'build' ? location.pathname + location.search : '#' + v);
+    $('#view-ref').scrollTop = 0;
+    scrollTo(0, 0);
+    renderView();
+  }
+  function bindViews() {
+    $('#views').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
+    $('#views').addEventListener('keydown', e => {
       if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      const keys = Object.keys(TABS), i = keys.indexOf(tab);
-      tab = keys[(i + (e.key === 'ArrowRight' ? 1 : keys.length - 1)) % keys.length];
-      pref.set('tab', tab); renderRef(); $(`#tabs [data-tab="${tab}"]`).focus();
+      const i = VIEWS.indexOf(view);
+      setView(VIEWS[(i + (e.key === 'ArrowRight' ? 1 : VIEWS.length - 1)) % VIEWS.length]);
+      $(`#views [data-view="${view}"]`).focus();
     });
-    $('#tab-panel').addEventListener('click', e => {
+    addEventListener('hashchange', () => setView(viewFromHash()));
+    $('#view-ref').addEventListener('click', e => {
       const s = e.target.closest('[data-side]');
-      if (s) { ledSide = s.dataset.side; renderRef(); }
+      if (s) { ledSide = s.dataset.side; renderRef(); $(`[data-side="${ledSide}"]`).focus(); }
     });
   }
 
@@ -535,7 +566,7 @@
     renderTodo();
     renderCard();
     if (window.THREE) Viewer.setStatuses?.(statusMap());
-    if (tab === 'print') renderRef();
+    if (view === 'print') renderRef();
 
     if (draft) { const i = $('.add-step input'); if (i) i.value = draft; }
     const el = focusAfter ? $(focusAfter) : key && key.map(k => $(k)).find(Boolean);
@@ -545,8 +576,8 @@
 
   async function main() {
     renderFace();
-    bindPlan(); bindShop(); bindRef(); bindStatus(); bindViewer();
-    renderRef();
+    bindPlan(); bindShop(); bindViews(); bindStatus(); bindViewer();
+    renderView();
     Store.subscribe(renderAll);
     await Store.load();
     startViewer();

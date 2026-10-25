@@ -13,23 +13,24 @@
 <body>
 
 <header class="top">
-  <div class="face" id="face" aria-hidden="true"></div>
-  <div class="title">
-    <h1>QLOCK</h1>
-    <p class="summary" id="summary"></p>
-  </div>
+  <h1 class="brand"><span class="face" id="face"></span>QLOCK</h1>
+  <nav class="views" role="tablist" aria-label="Sections" id="views">
+    <button type="button" role="tab" data-view="build" aria-controls="view-build">Build</button>
+    <button type="button" role="tab" data-view="wiring" aria-controls="view-ref">Wiring</button>
+    <button type="button" role="tab" data-view="leds" aria-controls="view-ref">LEDs</button>
+    <button type="button" role="tab" data-view="print" aria-controls="view-ref">Printing</button>
+    <button type="button" role="tab" data-view="firmware" aria-controls="view-ref">Firmware</button>
+  </nav>
+  <p class="summary" id="summary"></p>
   <div class="bar" aria-hidden="true"><i id="summary-bar"></i></div>
 </header>
 
 <div class="banner" id="banner" hidden></div>
 
-<main class="bench">
+<main class="bench" id="view-build" role="tabpanel" aria-label="Build">
   <section class="col col-plan" aria-labelledby="plan-h">
-    <div class="col-head">
-      <h2 id="plan-h">Plan</h2>
-      <span class="muted num" id="plan-count"></span>
-    </div>
-    <div id="phases"></div>
+    <div class="col-head"><h2 id="plan-h">Plan</h2></div>
+    <div class="scroll" id="phases"></div>
   </section>
 
   <section class="col col-model" aria-labelledby="model-h">
@@ -46,11 +47,6 @@
 
     <div class="viewer" id="viewer">
       <div class="v-tip" id="v-tip" hidden></div>
-      <div class="v-legend" id="v-legend">
-        <span><i class="dot st-buy"></i>To buy</span>
-        <span><i class="dot st-print"></i>To print</span>
-        <span><i class="dot st-build"></i>To build</span>
-      </div>
       <div class="v-load" id="v-load">Loading…</div>
       <div class="v-time" id="v-time" hidden>
         <input type="time" id="lit-time" step="300" aria-label="Time shown">
@@ -63,29 +59,20 @@
   </section>
 
   <section class="col col-shop" aria-labelledby="shop-h">
-    <div class="col-head">
-      <h2 id="shop-h">Shopping</h2>
-      <span class="muted num" id="shop-left"></span>
+    <div class="col-head"><h2 id="shop-h">Shopping</h2></div>
+    <div class="scroll">
+      <div id="shop"></div>
+      <button type="button" class="add-link" id="add-item-open">+ Add item</button>
+      <form class="add-item" id="add-item" autocomplete="off" hidden>
+        <input id="add-item-name" placeholder="Item" required maxlength="120" aria-label="Item">
+        <input id="add-item-price" type="number" min="0" step="0.01" placeholder="€" inputmode="decimal" aria-label="Price">
+        <button type="submit">Add</button>
+      </form>
     </div>
-    <div id="shop"></div>
-    <button type="button" class="add-link" id="add-item-open">+ Add item</button>
-    <form class="add-item" id="add-item" autocomplete="off" hidden>
-      <input id="add-item-name" placeholder="Item" required maxlength="120" aria-label="Item">
-      <input id="add-item-price" type="number" min="0" step="0.01" placeholder="€" inputmode="decimal" aria-label="Price">
-      <button type="submit">Add</button>
-    </form>
   </section>
 </main>
 
-<section class="ref" id="reference" aria-label="Reference">
-  <div class="tabs" role="tablist" id="tabs">
-    <button type="button" role="tab" data-tab="wiring">Wiring</button>
-    <button type="button" role="tab" data-tab="leds">LEDs</button>
-    <button type="button" role="tab" data-tab="print">Printing</button>
-    <button type="button" role="tab" data-tab="firmware">Firmware</button>
-  </div>
-  <div id="tab-panel" role="tabpanel"></div>
-</section>
+<main class="ref" id="view-ref" role="tabpanel" hidden></main>
 
 <script src="vendor/three.min.js"></script>
 <script src="vendor/OrbitControls.js"></script>
