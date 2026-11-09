@@ -2,86 +2,239 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QLOCK</title>
-<meta name="description" content="Build tracker for a 3D-printed Dutch word clock.">
 <meta name="color-scheme" content="dark light">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23131211'/%3E%3Cg fill='%23ffbe78'%3E%3Crect x='6' y='7' width='5' height='5'/%3E%3Crect x='13.5' y='7' width='5' height='5'/%3E%3Crect x='21' y='7' width='5' height='5'/%3E%3C/g%3E%3Cg fill='%233a3631'%3E%3Crect x='6' y='14' width='5' height='5'/%3E%3Crect x='13.5' y='14' width='5' height='5'/%3E%3Crect x='21' y='14' width='5' height='5'/%3E%3Crect x='6' y='21' width='5' height='5'/%3E%3C/g%3E%3Cg fill='%23ffbe78'%3E%3Crect x='13.5' y='21' width='5' height='5'/%3E%3Crect x='21' y='21' width='5' height='5'/%3E%3C/g%3E%3C/svg%3E">
-<link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23131211'/%3E%3Cg fill='%23ffbe78'%3E%3Crect x='7' y='8' width='5' height='5'/%3E%3Crect x='13.5' y='8' width='5' height='5'/%3E%3Crect x='20' y='19' width='5' height='5'/%3E%3C/g%3E%3Cg fill='%2338342f'%3E%3Crect x='20' y='8' width='5' height='5'/%3E%3Crect x='7' y='19' width='5' height='5'/%3E%3Crect x='13.5' y='19' width='5' height='5'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #131211; --card: #1b1a18; --line: #2e2b27; --ink: #ece7df; --muted: #a39c92;
+  --accent: #ffbe78; --on-accent: #24180a;
+  --face: #0b0a09; --off: #37332e; --lit: #ffdcae;
+  --w5: #e5645a; --wg: #948d83; --wd: #e2bd3a;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f2ee; --card: #ffffff; --line: #e4e0d9; --ink: #1e1c1a; --muted: #6a645c;
+    --accent: #c8741a; --on-accent: #ffffff;
+    --w5: #cf3a2c; --wg: #5d5750; --wd: #b08400;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+button { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ---- top: the clock and where you are */
+.top { display: grid; grid-template-columns: 200px 1fr; gap: 28px; align-items: center; margin-bottom: 28px; }
+.face {
+  position: relative; aspect-ratio: 1; background: var(--face); border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+.face .letters {
+  position: absolute; inset: 9.26%;
+  display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(10, 1fr);
+  place-items: center; font-size: 9.5px; font-weight: 600; line-height: 1; color: var(--off);
+}
+.face .letters .on { color: var(--lit); text-shadow: 0 0 6px rgba(255, 190, 120, .7); }
+.face .dot { position: absolute; width: 1.6%; aspect-ratio: 1; border-radius: 50%; background: var(--off); transform: translate(-50%, -50%); }
+.face .dot.on { background: var(--lit); box-shadow: 0 0 5px rgba(255, 190, 120, .8); }
+h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: .28em; color: var(--muted); }
+.now { margin: 6px 0 2px; font-size: 26px; font-weight: 650; line-height: 1.2; text-wrap: balance; }
+.next { margin: 0 0 16px; color: var(--muted); }
+.bar { display: flex; gap: 4px; }
+.bar i { flex: 1; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.bar b { display: block; height: 100%; background: var(--accent); transition: width .2s; }
+.note { margin: 0 0 20px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; color: var(--muted); font-size: 14px; }
+code { font: .92em ui-monospace, 'SF Mono', Menlo, monospace; }
+
+/* ---- phases */
+.phase { background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; }
+.phase > button {
+  display: grid; grid-template-columns: 30px 1fr auto 16px; gap: 12px; align-items: center;
+  width: 100%; padding: 16px 18px; background: none; border: 0; text-align: left; cursor: pointer;
+}
+.num {
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums;
+  border: 1.5px solid var(--line); color: var(--muted);
+}
+.phase.done .num { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.phase.current .num { border-color: var(--accent); color: var(--accent); }
+.phase .name { font-size: 18px; font-weight: 600; }
+.phase.done .name { color: var(--muted); }
+.count { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.chev { width: 16px; height: 16px; color: var(--muted); transition: transform .15s; }
+.phase > button[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.body { padding: 0 18px 18px; }
+.intro { margin: 0 0 10px 42px; color: var(--muted); }
+
+/* ---- steps and shopping rows */
+ul { list-style: none; margin: 0; padding: 0; }
+.row { display: grid; grid-template-columns: 30px 1fr auto; gap: 12px; align-items: start; padding: 9px 0; border-top: 1px solid var(--line); }
+.row label { display: contents; cursor: pointer; }
+input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; margin: 1px 0 0 4px; width: 22px; height: 22px; flex: none;
+  border: 1.5px solid var(--muted); border-radius: 7px; cursor: pointer; display: grid; place-items: center;
+}
+input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+input[type="checkbox"]:checked::after {
+  content: ''; width: 5px; height: 10px; margin-top: -2px;
+  border: solid var(--on-accent); border-width: 0 2.2px 2.2px 0; transform: rotate(45deg);
+}
+.t { display: block; }
+.h { display: block; color: var(--muted); font-size: 14.5px; }
+.row.done .t { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.row.done .h { display: none; }
+.eur { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.qty { color: var(--muted); }
+.shop a { text-decoration-color: var(--muted); text-underline-offset: 3px; }
+.group { margin: 18px 0 2px 42px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.group b { font-weight: 600; }
+.group span { color: var(--muted); font-size: 14px; }
+.group .sum { margin-left: auto; }
+
+/* ---- pictures */
+figure { margin: 20px 0 0; }
+figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.wiring { display: block; width: 100%; min-width: 620px; height: auto; }
+.wiring .w { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.wiring .v5 { stroke: var(--w5); } .wiring .gnd { stroke: var(--wg); } .wiring .data { stroke: var(--wd); }
+.wiring .box { fill: var(--bg); stroke: var(--muted); stroke-width: 1.2; }
+.wiring .chip { fill: var(--face); stroke: var(--muted); }
+.wiring .strip { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: var(--accent); }
+.wiring .part { fill: var(--bg); stroke: var(--ink); stroke-width: 1.5; }
+.wiring .plate { fill: none; stroke: var(--ink); stroke-width: 2.2; }
+.wiring .node { fill: var(--ink); }
+.wiring text { fill: var(--ink); font-size: 14.5px; font-weight: 600; }
+.wiring .s { font-size: 12.5px; font-weight: 400; fill: var(--muted); }
+.wiring .onchip { fill: #ece6dc; } .wiring .onchip.s { fill: #a8a094; }
+table { border-collapse: collapse; margin-top: 14px; font-size: 14.5px; }
+td { padding: 5px 16px 5px 0; border-top: 1px solid var(--line); vertical-align: top; }
+td:first-child { color: var(--muted); white-space: nowrap; }
+.map {
+  display: grid; grid-template-columns: repeat(13, 1fr); gap: 3px; min-width: 520px;
+  font-size: 15px; font-weight: 600; text-align: center;
+}
+.map span { aspect-ratio: 1; display: grid; place-content: center; border-radius: 4px; line-height: 1.1; }
+.map .led { background: var(--bg); border: 1px solid var(--line); }
+.map small { font-size: 9.5px; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+.map .dotled { border: 1px dashed var(--muted); border-radius: 50%; }
+.map .edge { color: var(--muted); font-weight: 400; }
+.map .in { color: var(--accent); font-size: 11px; font-weight: 600; }
+footer { margin-top: 28px; color: var(--muted); font-size: 14px; text-align: center; }
+
+@media (max-width: 560px) {
+  main { padding-top: 20px; }
+  .top { grid-template-columns: 112px 1fr; gap: 16px; }
+  .face .letters { font-size: 5.5px; }
+  .now { font-size: 20px; }
+  .next { font-size: 14.5px; margin-bottom: 10px; }
+  .phase > button { padding: 14px; }
+  .body { padding: 0 14px 14px; }
+  .intro, .group { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
 </head>
 <body>
-
-<header class="top">
-  <h1 class="brand"><span class="face" id="face"></span>QLOCK</h1>
-  <nav class="views" role="tablist" aria-label="Sections" id="views">
-    <button type="button" role="tab" data-view="build" aria-controls="view-build">Build</button>
-    <button type="button" role="tab" data-view="wiring" aria-controls="view-ref">Wiring</button>
-    <button type="button" role="tab" data-view="leds" aria-controls="view-ref">LEDs</button>
-    <button type="button" role="tab" data-view="print" aria-controls="view-ref">Printing</button>
-    <button type="button" role="tab" data-view="firmware" aria-controls="view-ref">Firmware</button>
-  </nav>
-  <p class="summary" id="summary"></p>
-  <div class="bar" aria-hidden="true"><i id="summary-bar"></i></div>
-</header>
-
-<div class="banner" id="banner" hidden></div>
-
-<main class="bench" id="view-build" role="tabpanel" aria-label="Build">
-  <section class="col col-plan" aria-labelledby="plan-h">
-    <div class="col-head"><h2 id="plan-h">Plan</h2></div>
-    <div class="scroll" id="phases"></div>
-  </section>
-
-  <section class="col col-model" aria-labelledby="model-h">
-    <div class="col-head">
-      <h2 id="model-h">Clock</h2>
-      <div class="controls">
-        <button type="button" class="btn" id="btn-explode" aria-pressed="true">Explode</button>
-        <button type="button" class="btn" id="btn-lit" aria-pressed="false">Light up</button>
-        <button type="button" class="btn icon" id="btn-reset" aria-label="Reset view" title="Reset view">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6M3 2.5v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
+<main>
+  <header class="top">
+    <div class="face" id="face" role="img"></div>
+    <div>
+      <h1>QLOCK</h1>
+      <p class="now" id="now"></p>
+      <p class="next" id="next"></p>
+      <div class="bar" id="bar" aria-hidden="true"></div>
     </div>
-
-    <div class="viewer" id="viewer">
-      <div class="v-tip" id="v-tip" hidden></div>
-      <div class="v-load" id="v-load">Loading…</div>
-      <div class="v-time" id="v-time" hidden>
-        <input type="time" id="lit-time" step="300" aria-label="Time shown">
-        <button type="button" id="lit-now">Now</button>
-      </div>
-      <aside class="v-card" id="v-card" hidden></aside>
-    </div>
-
-    <div class="todo" id="todo"></div>
-  </section>
-
-  <section class="col col-shop" aria-labelledby="shop-h">
-    <div class="col-head"><h2 id="shop-h">Shopping</h2></div>
-    <div class="scroll">
-      <div id="shop"></div>
-      <button type="button" class="add-link" id="add-item-open">+ Add item</button>
-      <form class="add-item" id="add-item" autocomplete="off" hidden>
-        <input id="add-item-name" placeholder="Item" required maxlength="120" aria-label="Item">
-        <input id="add-item-price" type="number" min="0" step="0.01" placeholder="€" inputmode="decimal" aria-label="Price">
-        <button type="submit">Add</button>
-      </form>
-    </div>
-  </section>
+  </header>
+  <p class="note" id="note" hidden>Ticks are only kept in this browser. Start the tracker with <code>python3 site/serve.py</code> to save them in the project.</p>
+  <div id="phases"></div>
+  <footer>The full guide, with every size and setting, is README.md.</footer>
 </main>
 
-<main class="ref" id="view-ref" role="tabpanel" hidden></main>
+<template id="fig-wiring">
+<figure>
+  <div class="scroll">
+  <svg class="wiring" viewBox="0 0 860 400" role="img" aria-label="Wiring of the controller">
+    <path class="w v5" d="M168 96 H800"/><path class="w gnd" d="M178 356 H800"/>
+    <text class="s" x="808" y="100">+5 V</text><text class="s" x="808" y="360">GND</text>
 
-<script src="vendor/three.min.js"></script>
-<script src="vendor/OrbitControls.js"></script>
-<script src="vendor/STLLoader.js"></script>
-<script src="data.js"></script>
-<script src="clock.js"></script>
-<script src="store.js"></script>
-<script src="viewer.js"></script>
-<script src="wiring.js"></script>
+    <rect class="box" x="20" y="24" width="128" height="44" rx="6" stroke-dasharray="4 3"/>
+    <text x="84" y="51" text-anchor="middle">5 V adapter</text>
+    <path class="w" stroke="var(--muted)" stroke-width="4" d="M84 68 V120"/>
+    <rect class="box" x="20" y="120" width="128" height="50" rx="6"/>
+    <text x="84" y="142" text-anchor="middle">DC jack</text>
+    <text class="s" x="84" y="159" text-anchor="middle">measure + first</text>
+    <path class="w v5" d="M148 134 H168 V96"/><path class="w gnd" d="M148 156 H178 V356"/>
+
+    <rect class="box" x="250" y="160" width="112" height="116" rx="6"/>
+    <text x="264" y="184">ESP32</text>
+    <text class="s" x="356" y="218" text-anchor="end">VIN</text>
+    <text class="s" x="356" y="240" text-anchor="end">GND</text>
+    <text class="s" x="356" y="262" text-anchor="end">16</text>
+    <rect x="372" y="204" width="16" height="66" rx="3" fill="var(--muted)"/>
+    <text class="s" x="380" y="290" text-anchor="middle">plug</text>
+    <path class="w v5" d="M362 214 H372 M388 214 H410 V96"/>
+    <path class="w gnd" d="M362 236 H372 M388 236 H424 V356"/>
+    <path class="w data" d="M362 258 H372 M388 258 H530"/>
+    <circle class="node" cx="410" cy="96" r="3.5"/><circle class="node" cx="424" cy="356" r="3.5"/>
+
+    <circle class="node" cx="470" cy="258" r="3.5"/>
+    <path class="w data" d="M470 258 V284"/><rect class="part" x="463" y="284" width="14" height="30" rx="2"/>
+    <path class="w gnd" d="M470 314 V356"/><circle class="node" cx="470" cy="356" r="3.5"/>
+    <text x="484" y="304">10 kΩ</text>
+
+    <rect class="chip" x="530" y="180" width="110" height="110" rx="4"/>
+    <text class="onchip" x="585" y="228" text-anchor="middle">74AHCT125</text>
+    <text class="onchip s" x="585" y="245" text-anchor="middle">100 nF: 14 to 7</text>
+    <text class="onchip s" x="537" y="262">2</text><text class="onchip s" x="633" y="262" text-anchor="end">3</text>
+    <text class="onchip s" x="568" y="197" text-anchor="middle">14</text>
+    <text class="onchip s" x="556" y="284" text-anchor="middle">1</text><text class="onchip s" x="602" y="284" text-anchor="middle">7</text>
+    <path class="w v5" d="M568 180 V96"/><circle class="node" cx="568" cy="96" r="3.5"/>
+    <path class="w gnd" d="M556 290 V356 M602 290 V356"/>
+    <circle class="node" cx="556" cy="356" r="3.5"/><circle class="node" cx="602" cy="356" r="3.5"/>
+
+    <path class="w data" d="M640 258 H652"/><rect class="part" x="652" y="251" width="30" height="14" rx="2"/>
+    <path class="w data" d="M682 258 H720"/><text x="667" y="242" text-anchor="middle">470 Ω</text>
+
+    <circle class="node" cx="700" cy="96" r="3.5"/><circle class="node" cx="700" cy="356" r="3.5"/>
+    <path class="w v5" d="M700 96 V150"/><path class="w gnd" d="M700 164 V356"/>
+    <path class="plate" d="M686 150 H714"/><path class="plate" d="M686 164 Q700 156 714 164"/>
+    <text x="640" y="146" text-anchor="middle">2200 µF</text>
+    <text class="s" x="640" y="162" text-anchor="middle">stripe to GND</text>
+
+    <rect class="strip" x="720" y="130" width="44" height="196" rx="4"/>
+    <text transform="translate(747 228) rotate(-90)" text-anchor="middle">LED strip</text>
+    <text class="s" x="772" y="262">DIN</text>
+    <path class="w v5" d="M742 96 V130"/><path class="w gnd" d="M742 326 V356"/>
+    <circle class="node" cx="742" cy="96" r="3.5"/><circle class="node" cx="742" cy="356" r="3.5"/>
+    <text class="s" x="772" y="120">power at</text><text class="s" x="772" y="134">both ends</text>
+
+    <path class="w v5" d="M20 222 H44"/><text class="s" x="52" y="226">+5 V, red wire</text>
+    <path class="w gnd" d="M20 244 H44"/><text class="s" x="52" y="248">GND, black wire</text>
+    <path class="w data" d="M20 266 H44"/><text class="s" x="52" y="270">data, yellow wire</text>
+  </svg>
+  </div>
+  <table>
+    <tr><td>Chip pins 14, 4, 10, 13</td><td>+5 V</td></tr>
+    <tr><td>Chip pins 7, 1, 5, 9, 12</td><td>GND</td></tr>
+    <tr><td>Chip pin 2</td><td>ESP32 pin 16, through the plug. Also 10 kΩ to GND</td></tr>
+    <tr><td>Chip pin 3</td><td>470 Ω, then the strip’s data input</td></tr>
+    <tr><td>Chip pins 6, 8, 11</td><td>nothing</td></tr>
+  </table>
+  <figcaption>Pin 1 of the chip is left of the notch; the numbers run anticlockwise.</figcaption>
+</figure>
+</template>
+
+<script src="guide.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

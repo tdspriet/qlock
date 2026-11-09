@@ -1,7 +1,3 @@
 .DS_Store
 .venv/
 __pycache__/
-
-# build tracker: progress.json is committed, its scratch copies are not
-site/progress.backup.json
-site/progress.tmp
