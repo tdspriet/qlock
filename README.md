@@ -1,16 +1,17 @@
 # QLOCK — Dutch word clock, 3D printed
 
-376 × 376 mm. 11 × 10 letters, all 110 lit, one LED per letter in its own
-little box. Prints on the Ultimaker 3 at work.
+450 × 450 mm, the full QLOCKTWO size. 11 × 10 letters, all 110 lit, one LED
+per letter in its own little box. Prints in four tiles on the Bambu Lab H2C
+at work.
 
 ```
 H E T K I S A V I J F      "HET IS VIJF OVER HALF DRIE"
 T I E N A T Z V O O R
-O V E R M E K W A R T      faceplate  376 x 376 x 2.5 mm, 4 tiles
-H A L F S P M O V E R      pitch      33.33 x 35 (cell 31.7 x 33.4)
+O V E R M E K W A R T      faceplate  450 x 450 x 2.5 mm, 4 tiles
+H A L F S P M O V E R      pitch      33.33 x 36.67 (cell 31.7 x 35.1)
 V O O R T H G E E N S      LEDs       110 x WS2812B
 T W E E A M C D R I E      depth      18 mm grid, ~16 mm LED to film
-V I E R V I J F Z E S      biggest tile  205 x 188 mm  (bed is 215)
+V I E R V I J F Z E S      biggest tile  242 x 225 mm  (bed 325 x 320)
 Z E V E N O N E G E N
 A C H T T I E N E L F
 T W A A L F P M U U R
@@ -18,7 +19,18 @@ T W A A L F P M U U R
 
 Column pitch is 33.333 mm on purpose — that's exactly a 30 LED/m strip. Cut it
 into 10 rows of 11 and every LED sits dead centre under its letter, in an
-identical 31.7 × 33.4 mm box. Nine jumpers instead of 110 hand-wired LEDs.
+identical 31.7 × 35.1 mm box. Nine jumpers instead of 110 hand-wired LEDs.
+
+The 45 cm plate keeps that pitch and adds a plain border instead: about
+49 mm from the edge to the nearest letter, the same on all four sides. That
+is why the rows are 36.667 mm apart rather than 35. Rows are separate strips,
+so row spacing is free; only the column pitch is fixed by the strip.
+
+**Why still four tiles:** the H2C bed is 325 × 320 mm on the left nozzle and
+305 × 320 mm on the right. Splitting 450 mm in two gives 450 × 225 mm pieces,
+which don't fit even diagonally. Four tiles of at most 242 × 225 mm fit
+either nozzle with room to spare. The old 376 mm version only existed to get
+four tiles onto the Ultimaker's 215 mm bed instead of nine.
 
 ## Build tracker
 
@@ -40,7 +52,7 @@ host (GitHub Pages) shows the committed progress read-only.
 
 Electronics from [TinyTronics](https://www.tinytronics.nl/en); diffuser and
 frame materials separately. Prices are estimates, excluding shipping. Use
-**2.85 mm PLA** for the Ultimaker 3.
+**1.75 mm PLA** for the H2C.
 
 | What | ~€ |
 |---|---|
@@ -92,10 +104,10 @@ at the intended brightness: the plastic should stay dark. If it glows, use
 a more opaque filament or increase `FACE_T` to 3.0 in `tools/qlock.py`,
 regenerate everything, and retest the new sample.
 
-The final parts contain about **407 g white + 392 g dark PLA** before brims,
-test pieces and waste. Have **at least 500 g of each colour** available;
-750 g or 1 kg spools leave room for a failed print. Printing time and actual
-filament consumption come from Cura's estimate for your printer profile.
+The final parts contain about **505 g white + 580 g dark PLA** (solid
+volume; these parts are thin, so infill hardly changes it), plus about 80 g
+of test pieces. Get **a 1 kg spool of each colour**. Printing time comes
+from Bambu Studio when you slice.
 
 ## Tools
 
@@ -118,46 +130,34 @@ a chisel tip is plenty.
 
 | File | Colour | Notes |
 |---|---|---|
-| `faceplate_TL TR BL BR` | any dark | face-down on the glass, no support |
-| `lightgrid_TL TR BL BR` | white | flat wall edges on glass, strip/wire notches up |
-| `splines_x10` | faceplate colour | 8 needed, 2 spare |
+| `faceplate_TL TR BL BR` | any dark | face-down on the plate, no support |
+| `lightgrid_TL TR BL BR` | white | flat wall edges on the plate, strip/wire notches up |
+| `splines_x14` | faceplate colour | 12 needed, 2 spare |
 | `test/faceplate_sample`, `test/lightgrid_sample`, `test/opacity_sample` | as above | print these first |
 
-**Use the regenerated files in this folder; replace any older Cura imports.**
-Tile names TL/TR/BL/BR always describe their position **seen from the front**.
-The exported faceplate is deliberately mirrored when viewed from above: the
-readable, smooth front is against the glass, with spline pockets facing up.
-Import at 100% scale with Z unchanged; **do not mirror it again**. The grid
-exports use the same orientation so the staggered seams still align.
+**Use the regenerated 450 mm files; delete any older imports.** Tile names
+TL/TR/BL/BR always describe their position **seen from the front**. The
+exported faceplate is deliberately mirrored when viewed from above: the
+readable front is against the build plate, with spline pockets facing up.
+Import at 100% scale, and **do not mirror it or let Bambu Studio
+auto-orient it**. The grid exports use the same orientation so the staggered
+seams still align.
 
-Cura: **single extruder, prime tower off** — disable extruder 2 in Cura's
-printer settings. Dual drops the bed to 197 mm and the wide tiles won't fit.
-Slice one wide tile first to check it isn't greyed out before queueing the
-rest. 0.2 mm layers, 20 % infill.
+**Bambu Studio, H2C:**
 
-For the **stock Ultimaker 3 profile, left extruder / AA 0.4**, use **1.2 mm
-brim (3 lines at 0.4 mm)**, initial-layer line width **100%**, and Travel
-Avoid Distance **1 mm**. Use a clean, level glass plate with the printer's
-recommended PLA adhesion treatment.
-
-For each full tile, keep its exported XY orientation, select Move and set
-**X = −12 mm, Y = −1 mm, Z = 0** relative to the bed centre. This placement
-was checked against Cura 5.13's UM3 clip keep-outs, left-nozzle reach and
-prime-blob clearance, including the brim. If you enabled Cura's **Flip Y
-axis** preference, enter **Y = +1 mm** instead. Prime tower stays off; the
-single-extruder prime blob can stay on. Do not auto-arrange afterwards.
-
-The old **4 mm brim** recommendation is withdrawn: a nominal 215 mm square
-does not account for the printer's reserved areas. Slice one wide faceplate
-and one wide grid with the actual workplace profile before queuing the rest;
-check that all brim and extrusion paths stay inside its printable area.
-
-Use the **AA 0.4 print core**. Inspect layer preview for continuous **0.8 mm
-seam half-walls** and the letter bridges. Enable Print Thin Walls if your
-Cura version exposes it; the preview is the deciding check.
-
-The parts contain about 800 g PLA before brims and samples. Plan the print
-queue using Cura's sliced time estimates.
+- One tile per plate. The biggest is 241.7 × 225 mm, so every part fits
+  either nozzle in any rotation; auto-arrange is fine. Splines and the three
+  samples can share one plate (two filaments, so expect some flushing there).
+- Every clock part is one colour: give each plate one filament. No prime
+  tower or flushing for those plates.
+- **0.20 mm Standard** process, 0.4 mm nozzle, 20% infill. Turn on **Detect
+  thin wall** and check in the preview that the 0.8 mm seam half-walls print.
+- **The build plate texture becomes the clock's front.** Use the Smooth PEI
+  plate or a Cool Plate for a smooth face. The Textured PEI plate gives a
+  matte, textured face, which can also look good; print the faceplate sample
+  on the plate you plan to use and decide.
+- No brim needed for the faceplates. If a grid tile corner lifts, add an
+  outer brim; every part leaves at least 5 mm of bed all round.
 
 O A R P D have a thin bridge at the top, or the middle of the O falls out.
 
@@ -168,11 +168,12 @@ test on a **1.3 mm** square, not 2.5.
 ## First print and light test
 
 Print the three files in `stl/test/`. The faceplate and grid samples are
-**72.1 × 83.8 mm**, cropped from the actual top-right corner. Seen from the
-smooth front they read **J F / O R**, with the clock's top and right rim intact.
+**109.1 × 115.8 mm**, cropped from the actual top-right corner. Seen from the
+smooth front they read **J F / O R**, with the clock's full border, ribs and
+rim beside them, so the sample also shows how wide the border looks.
 
 Use four spare LEDs from the 8-LED offcuts, as **two runs of two**. Keep the
-35 mm row spacing and centre each LED under its letter. Viewed from the
+36.67 mm row spacing and centre each LED under its letter. Viewed from the
 front, snake **J → F → R → O**. Fit the grid with its notches against the LED
 panel and a piece of the chosen diffuser between grid and faceplate. Tape
 or clamp it together first.
@@ -196,36 +197,37 @@ Keep all assemblies unglued until their wiring and lighting tests pass.
    up. From this rear view the TL tile is on your right. Confirm the smooth
    front reads correctly, then fit the splines and glue the seams.
 2. Glue the 4 grid tiles together. Each carries half a wall at the seams.
-3. Cut the LEE filter to **366 × 366**, 5 mm smaller all round.
+3. Cut the LEE filter to **440 × 440**, 5 mm smaller all round. The 50 cm
+   wide LEE sheet fits it.
 4. Film on the back of the faceplate, grid on top, glue around the rim only.
-   The film sits under the walls but not under the rim, so it props the grid
+   The film sits under the walls and border ribs but not under the rim, so it props the grid
    slightly proud by its actual thickness — **gel** superglue bridges that.
    Keep the film flat against the walls; clamp while the rim glue sets.
 5. LED strips on a 3–4 mm back panel. Test all rows and dry-fit before fixing
    the panel securely to the frame. Keep the rear cover removable.
 6. Wooden frame, rear cover, done.
 
-Keep the frame rebate under **10 mm** — the outer letters start 11.8 mm in
-from the plate edge and anything deeper starts covering them. Leave the USB
-port **and the removable ESP32 harness** reachable through the back.
+The outer letters start **48.8 mm** in from the plate edge, so the frame
+rebate is not critical: 10 mm is plenty. Leave the USB port **and the
+removable ESP32 harness** reachable through the back.
 
-Box depth ≈ 45 mm.
+Box depth ≈ 45 mm, inside 450 × 450 mm.
 
-> Faceplate and grid both split at **y = 188**, and nothing bridges that line
-> across the full width except four splines. Screw or glue the back panel to
+> Faceplate and grid both split at **y = 225**, and nothing bridges that line
+> across the full width except six splines. Screw or glue the back panel to
 > the grid over its whole area, or cross-brace the frame — otherwise the
 > finished clock has a hinge across its middle.
 
 ## Wiring
 
-Cut the strip into **10 runs of 11**. Stick them on the back panel 35 mm apart
+Cut the strip into **10 runs of 11**. Stick them on the back panel 36.667 mm apart
 and snake them **as seen from the front**: row 1 left→right, row 2
 right→left, etc. Viewed from the open back these directions reverse. Alternate rows get
 flipped 180°, so watch the arrows.
 
-With a nominal 376 × 376 mm panel, the first LED centre is **21.33 mm from
-the left and 30.5 mm from the top, seen from the front**. The next column is
-33.333 mm away and the next row 35 mm away. Mirror left/right when marking
+With a nominal 450 × 450 mm panel, the first LED centre is **58.33 mm from
+the left and 60 mm from the top, seen from the front**. The next column is
+33.333 mm away and the next row 36.667 mm away. Mirror left/right when marking
 the LED side of the panel from the back.
 
 The grid is already notched: 12 mm slots through every vertical wall for the
@@ -335,15 +337,10 @@ confirms the maximum of 23 lit letters. Mesh checks and a front preview are
 provided by `tools/verify.py`. Physical fit and lighting still require the
 small sample test above.
 
-All 12 STLs also passed a **CuraEngine 5.13 geometry smoke slice** at 0.2 mm
-layers / 0.4 mm nozzle, with the brim and placement above. This used explicit
-test settings, not the workplace printer's saved material profile; generate
-your final printer G-code in Cura. The stock UM3 keep-out calculation can be
-repeated on this Mac with:
-
-```bash
-.venv/bin/python tools/verify.py --cura-resources "/Applications/UltiMaker Cura.app/Contents/Resources/share/cura/resources"
-```
+`tools/verify.py` also checks that every STL fits the H2C's smaller
+(right-nozzle) bed, 305 × 320 mm, with 5 mm to spare all round. The 450 mm
+files have not been sliced in Bambu Studio yet: slice one wide faceplate and
+one wide grid and check the preview before queuing the rest.
 
 ## Word map
 
@@ -379,7 +376,7 @@ Two OVERs and two VOORs so every phrase still reads left-to-right:
 ## Files
 
 ```
-stl/                    9 full-size print files
+stl/                    9 full-size print files (450 mm, 4 tiles each)
 stl/test/               3 small material/fit/light test files
 firmware/qlock/         the ESP32 clock sketch
 firmware/light_test/    four-LED sample test, no Wi-Fi
@@ -402,5 +399,5 @@ python3 tools/check_firmware.py  # needs c++ (Xcode command-line tools on Mac)
 ```
 
 No CAD software needed. The letters live in a plain JSON file the script
-reads. STLs open in Preview, or better in Cura, which you need for the printer
-anyway. `.ino` opens in VS Code; Arduino IDE flashes it.
+reads. STLs open in Preview, or better in Bambu Studio, which you need for
+the printer anyway. `.ino` opens in VS Code; Arduino IDE flashes it.

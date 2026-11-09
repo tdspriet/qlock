@@ -27,9 +27,10 @@ OUT = ROOT / "stl"
 # --------------------------------------------------------------------------
 COLS, ROWS = 11, 10
 
-PLATE = 376.0              # outer size of the finished square faceplate
+PLATE = 450.0              # outer size of the finished square faceplate
 COL_PITCH = 1000.0 / 30.0  # 33.333 - locked to a 30 LED/m WS2812B strip
-ROW_PITCH = 35.0
+ROW_PITCH = 110.0 / 3.0    # 36.667 - rows are separate strips, so this is free;
+                           # chosen so the border is equal on all four sides
 
 FACE_T = 2.5               # faceplate thickness
 
@@ -43,9 +44,12 @@ WIRE_W = 6.0               # rear notch in horizontal walls for the jumper wires
 POCKET_L, POCKET_W, POCKET_D = 30.0, 8.0, 1.2   # spline pockets, faceplate back
 SPLINE_T = 1.0
 SPLINE_CLEAR = 0.3
+SPLINES = 14               # 12 pockets + 2 spare
 
-BED = 215.0                # Ultimaker 3 build plate, single extrusion
-BRIM = 1.2                 # 3 lines at 0.4 mm; see README for UM3 placement
+# Bambu Lab H2C, single nozzle: 325 x 320 left, 305 x 320 right. Check against
+# the smaller footprint so every part prints on either nozzle, any rotation.
+BED = (305.0, 320.0)
+BRIM = 5.0                 # room for a Bambu Studio auto brim, if it adds one
 
 # Design coordinates: looking at the FRONT, origin bottom-left. Export mirrors
 # X for face-down printing, with the spline pockets and rear wire slots up.
@@ -55,10 +59,16 @@ col_x = [MARGIN_X + i * COL_PITCH for i in range(COLS)]
 row_y = [PLATE - MARGIN_Y - r * ROW_PITCH for r in range(ROWS)]   # row 0 = top
 
 # Seams. The faceplate splits between letter columns 5|6, the light grid
-# between 6|7, so the grid straddles the faceplate's vertical joint.
-SEAM_X = MARGIN_X + 4.5 * COL_PITCH          # 171.33
-SEAM_Y = PLATE - MARGIN_Y - 4.5 * ROW_PITCH  # 188.00
-GRID_SEAM_X = MARGIN_X + 5.5 * COL_PITCH     # 204.67
+# between 6|7, so the grid straddles the faceplate's vertical joint. 450 mm
+# needs four tiles on the H2C: halves would be 450 long, the bed is 325.
+SEAM_X = MARGIN_X + 4.5 * COL_PITCH          # 208.33
+SEAM_Y = PLATE - MARGIN_Y - 4.5 * ROW_PITCH  # 225.00
+GRID_SEAM_X = MARGIN_X + 5.5 * COL_PITCH     # 241.67
+
+
+def fits_bed(x, y):
+    small, large = sorted((x + 2 * BRIM, y + 2 * BRIM))
+    return small <= min(BED) and large <= max(BED)
 
 
 def letter_field():
@@ -106,18 +116,28 @@ def cut(solid, cutters):
         [solid, trimesh.util.concatenate(cutters)], engine="manifold")
 
 
+def spline_positions():
+    """Where the splines cross the seams: (x, y, across) with across = 'x' for
+    the vertical seam, 'y' for the horizontal one. Four in the gaps between
+    letters along each seam, plus one in the middle of the plain border at
+    each end, so the 450 mm seams are held right out to the edge."""
+    gap_y = [(row_y[r] + row_y[r + 1]) / 2 for r in range(ROWS - 1)]
+    gap_x = [(col_x[c] + col_x[c + 1]) / 2 for c in range(COLS - 1)]
+    bx, by = wall_lines()
+    border_y = (by[0] / 2, (by[-1] + PLATE) / 2)
+    border_x = (bx[0] / 2, (bx[-1] + PLATE) / 2)
+    out = [(SEAM_X, y, 'x') for y in (border_y[1], gap_y[1], gap_y[3], gap_y[5], gap_y[7], border_y[0])]
+    out += [(x, SEAM_Y, 'y') for x in (border_x[0], gap_x[1], gap_x[3], gap_x[6], gap_x[8], border_x[1])]
+    return out
+
+
 def spline_pockets():
     """Pockets straddling each seam, on the back of the faceplate. They sit in
     the blank gaps between letters, never over one."""
-    gap_y = [(row_y[r] + row_y[r + 1]) / 2 for r in range(ROWS - 1)]
-    gap_x = [(col_x[c] + col_x[c + 1]) / 2 for c in range(COLS - 1)]
     out = []
-    for y in (gap_y[7], gap_y[5], gap_y[3], gap_y[1]):        # across the vertical seam
-        out.append(box(SEAM_X - POCKET_L / 2, y - POCKET_W / 2,
-                       SEAM_X + POCKET_L / 2, y + POCKET_W / 2))
-    for x in (gap_x[1], gap_x[3], gap_x[6], gap_x[8]):        # across the horizontal seam
-        out.append(box(x - POCKET_W / 2, SEAM_Y - POCKET_L / 2,
-                       x + POCKET_W / 2, SEAM_Y + POCKET_L / 2))
+    for x, y, across in spline_positions():
+        hx, hy = (POCKET_L / 2, POCKET_W / 2) if across == 'x' else (POCKET_W / 2, POCKET_L / 2)
+        out.append(box(x - hx, y - hy, x + hx, y + hy))
     return out
 
 
@@ -162,21 +182,19 @@ def build_grids():
     for name, rect in tiles.items():
         body = extrude(rect, WALL_H)
 
-        # everything inside the rim that isn't a wall gets removed. The margin
-        # strips only exist where the outer wall doesn't already merge into the
-        # rim - box() silently flips a reversed rectangle, which would saw a
-        # hairline slot through the rim and detach it.
-        def strip(x0, y0, x1, y1):
-            return [box(x0, y0, x1, y1)] if x1 - x0 > 1e-9 and y1 - y0 > 1e-9 else []
-
-        voids = (strip(RIM_T, RIM_T, bx[0] - WALL_T / 2, PLATE - RIM_T)
-                 + strip(bx[-1] + WALL_T / 2, RIM_T, PLATE - RIM_T, PLATE - RIM_T)
-                 + strip(RIM_T, RIM_T, PLATE - RIM_T, by[0] - WALL_T / 2)
-                 + strip(RIM_T, by[-1] + WALL_T / 2, PLATE - RIM_T, PLATE - RIM_T))
-        for i in range(COLS):
-            for j in range(ROWS):
-                voids.append(box(bx[i] + WALL_T / 2, by[j] + WALL_T / 2,
-                                 bx[i + 1] - WALL_T / 2, by[j + 1] - WALL_T / 2))
+        # everything inside the rim that isn't a wall gets removed. Every wall
+        # line carries on through the plain border to the rim, as a rib: it
+        # ties the cell block to the rim and stiffens the 450 mm faceplate.
+        # Border pockets have no LED, so they just stay dark. box() silently
+        # flips a reversed rectangle, which would saw a hairline slot through
+        # the rim and detach it - hence the size guard.
+        xs = [(RIM_T, 0)] + [(x, WALL_T / 2) for x in bx] + [(PLATE - RIM_T, 0)]
+        ys = [(RIM_T, 0)] + [(y, WALL_T / 2) for y in by] + [(PLATE - RIM_T, 0)]
+        voids = []
+        for (x0, hx0), (x1, hx1) in zip(xs, xs[1:]):
+            for (y0, hy0), (y1, hy1) in zip(ys, ys[1:]):
+                if x1 - hx1 - (x0 + hx0) > 1e-9 and y1 - hy1 - (y0 + hy0) > 1e-9:
+                    voids.append(box(x0 + hx0, y0 + hy0, x1 - hx1, y1 - hy1))
         body = cut(body, [prism(v, rect, WALL_H + 2, z=-1) for v in voids])
 
         notches, z = [], WALL_H - SLOT_H
@@ -201,11 +219,11 @@ def build_splines():
     l = POCKET_L - 2 * SPLINE_CLEAR
     w = POCKET_W - 2 * SPLINE_CLEAR
     parts = []
-    for i in range(10):                     # 8 needed, 10 printed
+    for i in range(SPLINES):                # 12 needed, 2 spare
         m = extrude(box(0, 0, l, w), SPLINE_T)
-        m.apply_translation((0, i * (w + 4), 0))
+        m.apply_translation((i % 2 * (l + 4), i // 2 * (w + 4), 0))
         parts.append(m)
-    yield "splines_x10", trimesh.util.concatenate(parts)
+    yield f"splines_x{SPLINES}", trimesh.util.concatenate(parts)
 
 
 def print_orientation(mesh):
@@ -221,7 +239,7 @@ def print_orientation(mesh):
 
 
 def build_test_pieces(parts):
-    """Crop four real cells (JF / OR), including the outer rim and wire slot."""
+    """Crop four real cells (JF / OR), with the border ribs and rim beside them."""
     bx, by = wall_lines()
     rect = box(bx[-3] - WALL_T / 2, by[-3] - WALL_T / 2, PLATE, PLATE)
     clip = extrude(rect, WALL_H + 2, z=-1)
@@ -253,7 +271,7 @@ def main():
         mesh.export(target)
         x, y, z = mesh.extents
         rows.append((name, x, y, z, mesh.volume / 1000,
-                     "ok" if max(x, y) + 2 * BRIM <= BED else "TOO BIG"))
+                     "ok" if fits_bed(x, y) else "TOO BIG"))
 
     w = max(len(r[0]) for r in rows)
     print(f"{'part':<{w}}  {'X':>7} {'Y':>7} {'Z':>6}  {'cm3':>7}  {'PLA g':>6}  bed")

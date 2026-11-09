@@ -9,18 +9,18 @@
 // Same numbers as tools/qlock.py CONFIG. Design coordinates: seen from the
 // FRONT, origin bottom-left, mm.
 const GEO = (() => {
-  const COLS = 11, ROWS = 10, PLATE = 376, COL_PITCH = 1000 / 30, ROW_PITCH = 35;
-  const MARGIN_X = (PLATE - (COLS - 1) * COL_PITCH) / 2;   // 21.33
-  const MARGIN_Y = (PLATE - (ROWS - 1) * ROW_PITCH) / 2;   // 30.5
+  const COLS = 11, ROWS = 10, PLATE = 450, COL_PITCH = 1000 / 30, ROW_PITCH = 110 / 3;
+  const MARGIN_X = (PLATE - (COLS - 1) * COL_PITCH) / 2;   // 58.33
+  const MARGIN_Y = (PLATE - (ROWS - 1) * ROW_PITCH) / 2;   // 60
   const colX = [...Array(COLS)].map((_, i) => MARGIN_X + i * COL_PITCH);
   const rowY = [...Array(ROWS)].map((_, r) => PLATE - MARGIN_Y - r * ROW_PITCH);
   return {
     COLS, ROWS, PLATE, COL_PITCH, ROW_PITCH, MARGIN_X, MARGIN_Y, colX, rowY,
     FACE_T: 2.5, WALL_T: 1.6, WALL_H: 18, RIM_T: 4,
     POCKET_L: 30, POCKET_W: 8, POCKET_D: 1.2, SPLINE_T: 1, SPLINE_CLEAR: 0.3,
-    SEAM_X: MARGIN_X + 4.5 * COL_PITCH,        // 171.33 faceplate vertical seam
-    SEAM_Y: PLATE - MARGIN_Y - 4.5 * ROW_PITCH, // 188    both horizontal seams
-    GRID_SEAM_X: MARGIN_X + 5.5 * COL_PITCH,   // 204.67 grid vertical seam
+    SEAM_X: MARGIN_X + 4.5 * COL_PITCH,        // 208.33 faceplate vertical seam
+    SEAM_Y: PLATE - MARGIN_Y - 4.5 * ROW_PITCH, // 225    both horizontal seams
+    GRID_SEAM_X: MARGIN_X + 5.5 * COL_PITCH,   // 241.67 grid vertical seam
   };
 })();
 
@@ -100,24 +100,24 @@ const SHOP = [
     note: 'Skip it if you have one that carries data, not only charge.' },
 
   // materials ---------------------------------------------------------------
-  { id: 'pla-white', group: 'materials', shop: '123-3D', name: 'White PLA 2.85 mm, 1 kg', qty: 1, price: 22.5,
-    url: 'https://www.123-3d.nl/123-3D-Filament-PLA-Wit-2-85-mm-1-kg-i11646.html',
-    note: 'Light grid: about 340 g sliced, plus the test piece and any failed print. Check first whether work has 2.85 mm white. Ultimaker-brand alternative: 750 g for €43.56 at MakerPoint.' },
-  { id: 'pla-black', group: 'materials', shop: '123-3D', name: 'Black PLA 2.85 mm, 1 kg', qty: 1, price: 22.5,
-    url: 'https://www.123-3d.nl/123-3D-Filament-PLA-Zwart-2-85-mm-1-kg-i11645.html',
-    note: 'Faceplate and splines: about 340 g sliced. Opacity unknown: the 1.3 mm opacity test decides. Ultimaker black, 750 g for €43.56 at MakerPoint, is the fallback.' },
+  { id: 'pla-white', group: 'materials', shop: '123-3D', name: 'White PLA 1.75 mm, 1 kg', qty: 1, price: 22.5,
+    url: 'https://www.123-3d.nl/123-3D-Filament-PLA-Wit-1-75-mm-1-kg-i11622.html',
+    note: 'Light grid: about 505 g solid, plus the 42 g test piece and any failed print. Check first whether work has white for the H2C (Bambu PLA Basic works too).' },
+  { id: 'pla-black', group: 'materials', shop: '123-3D', name: 'Black PLA 1.75 mm, 1 kg', qty: 1, price: 22.5,
+    url: 'https://www.123-3d.nl/123-3D-Filament-PLA-Zwart-1-75-mm-1-kg-i11621.html',
+    note: 'Faceplate and splines: about 580 g solid, plus the 39 g of test pieces. Opacity unknown: the 1.3 mm opacity test decides. Bambu PLA Basic or Matte black is the fallback.' },
   { id: 'diffuser', group: 'materials', shop: 'Bax-shop', name: 'LEE 216 White Diffusion, 120 × 50 cm', qty: 1, price: 11.8,
     url: 'https://www.bax-shop.be/nl/lichtfilters/lee-filter-120-x-50cm-216-white-diffusion',
-    note: 'Cut to 366 × 366 mm. Tracing paper at full size turns out dearer (large sheets ≈ €40), so LEE 216 is the cheaper option here.' },
+    note: 'Cut to 440 × 440 mm: fits the 50 cm width. Tracing paper at full size turns out dearer (large sheets ≈ €40), so LEE 216 is the cheaper option here.' },
   { id: 'tracing', group: 'materials', shop: '123inkt', name: 'Tracing paper A3, 90 g/m², 10 sheets (optional)', qty: 1, price: 5.75,
     url: 'https://www.123inkt.be/Canson-kalkpapier-overtrekpapier-A3-10-vellen-00017253-i24422.html',
-    note: 'Only to compare against LEE 216 in the light test: A3 is too narrow for the full 366 mm face.' },
+    note: 'Only to compare against LEE 216 in the light test: A3 is too narrow for the full 440 mm face.' },
   { id: 'plywood', group: 'materials', shop: 'Hubo', name: 'Plywood 3.6 mm, 122 × 61 cm', qty: 1, price: 9.99, later: true,
     url: 'https://www.hubo.be/nl/p/multiplex-122x61-cm-3-6mm/12495/',
     note: 'One sheet gives the back panel and the rear cover. Hubo cuts to size. Buy after the dry-fit: measure the real assembly first.' },
   { id: 'timber', group: 'materials', shop: 'Gamma', name: 'Planed spruce batten 18 × 44 mm, 240 cm', qty: 1, price: 5.59, later: true, src: 'search result, page not loaded',
     url: 'https://www.gamma.be/nl/assortiment/lat-geschaafd-vuren-fsc-18x44-mm-240-cm/p/B270487',
-    note: 'For a box about 45 mm deep; 4 sides of ~41 cm fit in 240 cm. Check against the measured stack; 44 × 69 mm exists if you need more depth. Rebate under 10 mm.' },
+    note: 'For a box about 45 mm deep; 4 sides of ~49 cm fit in 240 cm. Check against the measured stack; 44 × 69 mm exists if you need more depth. Rebate under 10 mm.' },
   { id: 'hardware', group: 'materials', shop: 'Hubo', name: 'Chipboard screws 3.5 × 16 mm, 165 pcs', qty: 1, price: 4.99, later: true,
     url: 'https://www.hubo.be/nl/p/mack-spaanplaatschroeven-pz2-16x3-5-mm-geelverzinkt-165-stuks/209400/',
     note: 'Back panel and rear cover. Add a grommet or clip as strain relief for the DC cable.' },
@@ -166,19 +166,19 @@ const PHASES = [
     tasks: [
       { id: 'buy-electronics', title: 'Order the electronics from TinyTronics', shop: ['esp32', 'strip', 'shifter', 'dipsocket', 'perfboard', 'psu', 'dcjack', 'cap1000', 'cap100n', 'resistors', 'harness', 'headers', 'wire-red', 'wire-black', 'wire-yellow', 'wire-feed', 'heatshrink', 'usbcable'] },
       { id: 'buy-tools', title: 'Get the tools', shop: ['iron', 'tip', 'solder', 'flux', 'strippers', 'cutters', 'hands', 'superglue', 'sandpaper', 'tape', 'multimeter', 'woodtools'] },
-      { id: 'buy-filament', title: 'Get ≥ 500 g white and ≥ 500 g opaque black PLA, 2.85 mm', shop: ['pla-white', 'pla-black'] },
+      { id: 'buy-filament', title: 'Get 1 kg white and 1 kg opaque black PLA, 1.75 mm', shop: ['pla-white', 'pla-black'] },
       { id: 'buy-diffuser', title: 'Get the diffuser film (and tracing paper to compare)', shop: ['diffuser', 'tracing'] },
       { id: 'sw-arduino', title: 'Install Arduino IDE with esp32 core 3.3.12 and FastLED 3.10.5', ref: 'firmware',
         note: 'Board: ESP32 Dev Module. Default 4 MB flash / OTA-capable partition scheme.' },
-      { id: 'sw-cura', title: 'Set Cura to single extruder for the UM3 and turn the prime tower off', ref: 'print',
-        note: 'Disable extruder 2 in the printer settings. Dual extrusion shrinks the bed to 197 mm and the wide tiles will not fit.' },
+      { id: 'sw-cura', title: 'Set up Bambu Studio for the H2C, one filament per plate', ref: 'print',
+        note: 'Every part is one colour: one filament per plate, no flushing or prime tower. The biggest tile is 242 × 225 mm, so either nozzle reaches it.' },
     ],
   },
   {
     id: 'test-prints', name: 'Test prints', blurb: 'Small samples first: about 3 hours, cheap to fail.',
     tasks: [
-      { id: 'slice-check', title: 'Slice one wide faceplate and one wide grid with the workplace profile', ref: 'print',
-        note: 'Move each tile to X = −12, Y = −1, Z = 0 (Y = +1 if Flip Y is on). Brim 1.2 mm. Check the brim stays inside the printable area, and in layer view check the 0.8 mm seam half-walls and the letter bridges.' },
+      { id: 'slice-check', title: 'Slice one wide faceplate and one wide grid in Bambu Studio', ref: 'print',
+        note: 'Import at 100 %, no mirroring, no auto-orient. In the preview, check the 0.8 mm seam half-walls and the letter bridges.' },
       { id: 'print-opacity', title: 'Print opacity_sample in black', part: 'opacity_sample' },
       { id: 'print-face-sample', title: 'Print faceplate_sample in black', part: 'faceplate_sample' },
       { id: 'print-grid-sample', title: 'Print lightgrid_sample in white', part: 'lightgrid_sample' },
@@ -194,7 +194,7 @@ const PHASES = [
         note: 'Label both halves. Check continuity per pin; don’t trust the wire colours.' },
       { id: 'cut-sample-leds', title: 'Cut one metre into 11 + 11 + 8 and take two pairs from the 8', ref: 'leds' },
       { id: 'wire-sample', title: 'Wire the sample: two runs of two, snake J → F → R → O', ref: 'leds',
-        note: '35 mm row spacing, each LED centred under its letter. Grid notches against the LED panel, diffuser between grid and faceplate. Tape or clamp, no glue.' },
+        note: '36.67 mm row spacing, each LED centred under its letter. Grid notches against the LED panel, diffuser between grid and faceplate. Tape or clamp, no glue.' },
       { id: 'flash-light-test', title: 'Flash light_test.ino over USB', ref: 'firmware',
         note: 'Unplug the whole ESP32 harness first. Never attach USB with the harness connected.' },
       { id: 'opacity-check', title: 'Opacity check: lit LED behind the 1.3 mm square stays dark',
@@ -205,7 +205,7 @@ const PHASES = [
     ],
   },
   {
-    id: 'print', name: 'Print the clock', blurb: 'Nine big prints. Use the regenerated files, never mirror them again.',
+    id: 'print', name: 'Print the clock', blurb: 'Eight big plates and the splines. Use the regenerated 45 cm files, never mirror them.',
     tasks: [
       { id: 'print-face-TL', title: 'Print faceplate_TL (black)', part: 'faceplate_TL' },
       { id: 'print-face-TR', title: 'Print faceplate_TR (black)', part: 'faceplate_TR' },
@@ -215,7 +215,7 @@ const PHASES = [
       { id: 'print-grid-TR', title: 'Print lightgrid_TR (white)', part: 'lightgrid_TR' },
       { id: 'print-grid-BL', title: 'Print lightgrid_BL (white)', part: 'lightgrid_BL' },
       { id: 'print-grid-BR', title: 'Print lightgrid_BR (white)', part: 'lightgrid_BR' },
-      { id: 'print-splines', title: 'Print splines_x10 (black, 8 needed)', part: 'splines' },
+      { id: 'print-splines', title: 'Print splines_x14 (black, 12 needed)', part: 'splines' },
     ],
   },
   {
@@ -226,7 +226,7 @@ const PHASES = [
       { id: 'buy-wood', title: 'Measure the dry-fit, then buy the wood', shop: ['plywood', 'timber', 'hardware'] },
       { id: 'cut-panel', title: 'Cut the 3–4 mm back panel' },
       { id: 'mark-panel', title: 'Mark the LED rows on the panel', ref: 'leds',
-        note: 'First LED centre 21.33 mm from the left and 30.5 mm from the top, seen from the front. 33.333 mm per column, 35 mm per row. Mirror left/right when you mark from the back.' },
+        note: 'First LED centre 58.33 mm from the left and 60 mm from the top, seen from the front. 33.333 mm per column, 36.667 mm per row. Mirror left/right when you mark from the back.' },
       { id: 'cut-rows', title: 'Cut the strips into 10 runs of 11 LEDs', ref: 'leds' },
       { id: 'stick-rows', title: 'Stick the rows on, snaking as seen from the front', ref: 'leds',
         note: 'Row 1 left → right, row 2 right → left… Alternate rows are turned 180°: follow the arrows. Keep each strip within ±1 mm of its row or the grid won’t seat.' },
@@ -249,7 +249,7 @@ const PHASES = [
       { id: 'glue-face', title: 'Fit the splines and glue the faceplate seams',
         note: 'Seen from the back, TL is on your right. Confirm the front reads correctly before the glue goes on.' },
       { id: 'glue-grid', title: 'Glue the four grid tiles together', note: 'Each tile carries half a wall at the seams.' },
-      { id: 'cut-film', title: 'Cut the diffuser to 366 × 366 mm (5 mm in all round)' },
+      { id: 'cut-film', title: 'Cut the diffuser to 440 × 440 mm (5 mm in all round)' },
       { id: 'glue-film', title: 'Film on the faceplate back, grid on top, glue the rim only',
         note: 'Gel superglue bridges the film thickness at the rim. Keep the film flat against the walls and clamp while it sets.' },
     ],
@@ -258,9 +258,9 @@ const PHASES = [
     id: 'frame', name: 'Frame and finish', blurb: 'The box, the back, and hanging it up.',
     tasks: [
       { id: 'frame', title: 'Build the wooden frame, about 45 mm deep',
-        note: 'Keep the rebate under 10 mm: the outer letters start 11.8 mm in from the plate edge.' },
+        note: 'The outer letters start 48.8 mm in from the plate edge, so the rebate is free: 10 mm is plenty.' },
       { id: 'fix-panel', title: 'Fix the back panel to the grid over its whole area',
-        note: 'Faceplate and grid both split at y = 188 with only four splines across. Without this (or a cross-brace) the clock hinges in the middle.' },
+        note: 'Faceplate and grid both split at y = 225 with only six splines across. Without this (or a cross-brace) the clock hinges in the middle.' },
       { id: 'rear-cover', title: 'Make the removable rear cover, with strain relief for the DC cable',
         note: 'Keep the USB port and the ESP32 harness reachable from the back.' },
       { id: 'final-check', title: 'Final check: right time, dims at 23:00, OTA update works', ref: 'firmware',
@@ -287,7 +287,7 @@ const PARTS = [
       { kind: 'build', label: 'Glue seams', task: 'glue-face' },
     ],
   })),
-  { id: 'splines', name: 'Splines (8 of 10)', family: 'splines', kind: 'print', stl: 'splines_x10.stl', colour: 'black', layer: 'splines',
+  { id: 'splines', name: 'Splines (12 of 14)', family: 'splines', kind: 'print', stl: 'splines_x14.stl', colour: 'black', layer: 'splines',
     steps: [
       { kind: 'print', label: 'Black PLA', shop: ['pla-black'] },
       { kind: 'print', label: 'Print', task: 'print-splines' },
@@ -296,7 +296,7 @@ const PARTS = [
   { id: 'diffuser', name: 'Diffuser film', family: 'diffuser', kind: 'buy', layer: 'diffuser',
     steps: [
       { kind: 'buy', label: 'Buy', shop: ['diffuser'] },
-      { kind: 'build', label: 'Cut 366 × 366', task: 'cut-film' },
+      { kind: 'build', label: 'Cut 440 × 440', task: 'cut-film' },
       { kind: 'build', label: 'Glue in', task: 'glue-film' },
     ] },
   ...['TL', 'TR', 'BL', 'BR'].map(t => ({
@@ -373,34 +373,33 @@ const PARTS = [
     ] },
 ];
 
-// size: exported STL bounds. g / min: CuraEngine 5.13 slice with the README
-// settings (UM3, AA 0.4, 0.2 mm, 20 % infill, 1.2 mm brim), PLA at 1.24 g/cm³.
-// gSolid: STL volume × 1.24, the README's "about 800 g" figure.
+// size: exported STL bounds. g: STL volume × 1.24 g/cm³. The parts are thin
+// enough that infill hardly changes this. min: none yet; Bambu Studio shows
+// the H2C time when you slice.
 const PRINT_INFO = {
-  faceplate_TL: { size: '171.3 × 188 × 2.5', g: 76, gSolid: 89, min: 397 },
-  faceplate_TR: { size: '204.7 × 188 × 2.5', g: 91, gSolid: 106, min: 473 },
-  faceplate_BL: { size: '171.3 × 188 × 2.5', g: 76, gSolid: 89, min: 398 },
-  faceplate_BR: { size: '204.7 × 188 × 2.5', g: 91, gSolid: 106, min: 473 },
-  lightgrid_TL: { size: '204.7 × 188 × 18', g: 92, gSolid: 109, min: 409 },
-  lightgrid_TR: { size: '171.3 × 188 × 18', g: 79, gSolid: 94, min: 350 },
-  lightgrid_BL: { size: '204.7 × 188 × 18', g: 92, gSolid: 109, min: 418 },
-  lightgrid_BR: { size: '171.3 × 188 × 18', g: 78, gSolid: 94, min: 355 },
-  splines: { size: '29.4 × 110 × 1', g: 3, gSolid: 3, min: 17 },
-  opacity_sample: { size: '25 × 25 × 1.3', g: 1, gSolid: 1, min: 4 },
-  faceplate_sample: { size: '72.1 × 83.8 × 2.5', g: 15, gSolid: 17, min: 75 },
-  lightgrid_sample: { size: '72.1 × 83.8 × 18', g: 21, gSolid: 27, min: 91 },
+  faceplate_TL: { size: '208.3 × 225 × 2.5', g: 134 },
+  faceplate_TR: { size: '241.7 × 225 × 2.5', g: 155 },
+  faceplate_BL: { size: '208.3 × 225 × 2.5', g: 134 },
+  faceplate_BR: { size: '241.7 × 225 × 2.5', g: 155 },
+  lightgrid_TL: { size: '241.7 × 225 × 18', g: 134 },
+  lightgrid_TR: { size: '208.3 × 225 × 18', g: 118 },
+  lightgrid_BL: { size: '241.7 × 225 × 18', g: 134 },
+  lightgrid_BR: { size: '208.3 × 225 × 18', g: 118 },
+  splines: { size: '62.8 × 75.8 × 1', g: 4 },
+  opacity_sample: { size: '25 × 25 × 1.3', g: 1 },
+  faceplate_sample: { size: '109.1 × 115.8 × 2.5', g: 38 },
+  lightgrid_sample: { size: '109.1 × 115.8 × 18', g: 42 },
 };
-const PRINT_TIME_NOTE = 'Times and grams from a CuraEngine 5.13 slice with the settings below (UM3 “Fast” 0.2 mm profile, generic PLA, 20 % infill, 1.2 mm brim), without heat-up. Cura on the printer’s own profile may differ a little. The README’s 407 g + 392 g is the solid volume; with 20 % infill it comes to about 340 g of each colour.';
 
 const PART_NOTES = {
-  faceplate: 'Prints face-down on the glass, spline pockets up, no support. The file is deliberately mirrored when seen from above: do not mirror it again. O A R P D have a thin bridge at the top so their middles stay put.',
-  lightgrid: 'Flat wall edges on the glass, strip and wire notches up. Each tile carries half a wall at the seams. 12 mm slots let the strip pass every vertical wall; 6 mm notches at the ends carry the row jumpers.',
-  splines: 'Print in the faceplate colour: the pockets leave only 1.3 mm of plate, partly over a lit cell. Four bridge the vertical seam, four the horizontal one.',
+  faceplate: 'Prints face-down on the plate, spline pockets up, no support. The plate texture becomes the front: smooth plate for a smooth face. The file is deliberately mirrored when seen from above: do not mirror it again. O A R P D have a thin bridge at the top so their middles stay put.',
+  lightgrid: 'Flat wall edges on the plate, strip and wire notches up. The cell walls carry on through the plain border to the rim as ribs. Each tile carries half a wall at the seams. 12 mm slots let the strip pass every vertical wall; 6 mm notches at the ends carry the row jumpers.',
+  splines: 'Print in the faceplate colour: the pockets leave only 1.3 mm of plate, partly over a lit cell. Six bridge the vertical seam, six the horizontal one, including one in the plain border at each end.',
   diffuser: 'Sealed inside the sandwich between faceplate and grid, so choose it after the light test. It sits under the walls but not under the 4 mm rim.',
-  leds: 'Column pitch is 33.333 mm on purpose: exactly a 30 LED/m strip. Each 11-LED run is 366.7 mm in a 368 mm gap, so about 0.7 mm play at each end.',
-  panel: 'LED strips stick to its front face. Screw or glue it to the grid over the whole area, or the clock hinges at y = 188.',
+  leds: 'Column pitch is 33.333 mm on purpose: exactly a 30 LED/m strip. Rows are 36.667 mm apart so the border is the same on all four sides. Each 11-LED run is 366.7 mm in a 368 mm gap, so about 0.7 mm play at each end.',
+  panel: 'LED strips stick to its front face. Screw or glue it to the grid over the whole area, or the clock hinges at y = 225.',
   electronics: 'ESP32 on a removable 3-wire harness (VIN, GND, GPIO16). The SN74AHCT125N lifts the 3.3 V data to 5 V. Strip current never runs through the harness.',
-  frame: 'Box depth about 45 mm. Rebate under 10 mm, or it starts covering the outer letters.',
+  frame: 'Box depth about 45 mm, inside 450 × 450. The letters sit 48.8 mm from the edge, so the rebate is not critical.',
   rearcover: 'Removable, with the USB port and the harness reachable, and strain relief for the DC cable.',
-  test: 'Cropped from the real top-right corner: reads J F / O R from the smooth front, with the clock’s top and right rim intact.',
+  test: 'Cropped from the real top-right corner: reads J F / O R from the smooth front, with the full border, ribs and rim beside them.',
 };

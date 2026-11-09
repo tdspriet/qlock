@@ -122,12 +122,17 @@ const Viewer = (() => {
     const gapX = G.colX.slice(0, -1).map((x, c) => (x + G.colX[c + 1]) / 2);
     const L = G.POCKET_L - 2 * G.SPLINE_CLEAR, W = G.POCKET_W - 2 * G.SPLINE_CLEAR;
     const sp = new THREE.Group();
-    for (const r of [7, 5, 3, 1]) sp.add(box(L, W, G.SPLINE_T, MAT.black, fx(G.SEAM_X), fy(gapY[r]), -2.0));
-    for (const c of [1, 3, 6, 8]) sp.add(box(W, L, G.SPLINE_T, MAT.black, fx(gapX[c]), fy(G.SEAM_Y), -2.0));
+    // plus one in the plain border at each end of each seam, as in tools/qlock.py
+    const cellX0 = G.colX[0] - G.COL_PITCH / 2, cellX1 = G.colX[G.COLS - 1] + G.COL_PITCH / 2;
+    const cellY0 = G.rowY[G.ROWS - 1] - G.ROW_PITCH / 2, cellY1 = G.rowY[0] + G.ROW_PITCH / 2;
+    const ys = [(cellY1 + G.PLATE) / 2, ...[1, 3, 5, 7].map(r => gapY[r]), cellY0 / 2];
+    const xs = [cellX0 / 2, ...[1, 3, 6, 8].map(c => gapX[c]), (cellX1 + G.PLATE) / 2];
+    for (const y of ys) sp.add(box(L, W, G.SPLINE_T, MAT.black, fx(G.SEAM_X), fy(y), -2.0));
+    for (const x of xs) sp.add(box(W, L, G.SPLINE_T, MAT.black, fx(x), fy(G.SEAM_Y), -2.0));
     register('splines', 'splines', sp);
 
     // diffuser film, 5 mm in from the plate edge all round
-    const film = new THREE.Mesh(new THREE.PlaneGeometry(366, 366), MAT.film);
+    const film = new THREE.Mesh(new THREE.PlaneGeometry(G.PLATE - 10, G.PLATE - 10), MAT.film);
     register('diffuser', 'diffuser', film);
 
     // letter glow: one quad per cell just behind the faceplate, visible
@@ -318,10 +323,10 @@ const Viewer = (() => {
   // ---------------------------------------------------------------- camera
   // direction from the target to the camera; the distance is fitted
   const VIEWS = {
-    iso:   { dir: [0.66, 0.36, 0.66], target: [0, -6, -100], r: 270 },
-    front: { dir: [0, 0, 1], target: [0, 0, -20], r: 225 },
-    back:  { dir: [0, 0.08, -1], target: [0, 0, -60], r: 225 },
-    side:  { dir: [1, 0.12, 0.03], target: [0, 0, -120], r: 250 },
+    iso:   { dir: [0.66, 0.36, 0.66], target: [0, -6, -100], r: 320 },
+    front: { dir: [0, 0, 1], target: [0, 0, -20], r: 265 },
+    back:  { dir: [0, 0.08, -1], target: [0, 0, -60], r: 265 },
+    side:  { dir: [1, 0.12, 0.03], target: [0, 0, -120], r: 295 },
   };
   function view(name, instant) {
     const v = VIEWS[name];
@@ -446,7 +451,7 @@ const Viewer = (() => {
     };
     requestAnimationFrame(loop);
 
-    // splines_x10.stl is a bed layout; the 8 fitted splines are modelled above
+    // splines_x14.stl is a bed layout; the 12 fitted splines are modelled above
     return loadStls(PARTS.filter(p => p.stl && !p.test && p.layer !== 'splines'), opts.stlBase, opts.onProgress || (() => {}));
   }
 

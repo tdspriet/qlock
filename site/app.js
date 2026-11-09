@@ -409,8 +409,8 @@
       <div>
         <h3>Marking the panel</h3>
         <dl class="specs">
-          <dt>First LED</dt><dd>21.33 mm from the left, 30.5 mm from the top, seen from the front</dd>
-          <dt>Spacing</dt><dd>33.333 mm across, 35 mm down</dd>
+          <dt>First LED</dt><dd>58.33 mm from the left, 60 mm from the top, seen from the front</dd>
+          <dt>Spacing</dt><dd>33.333 mm across, 36.667 mm down</dd>
           <dt>Tolerance</dt><dd>±1 mm up/down, or the grid won’t seat</dd>
           <dt>Strip run</dt><dd>366.7 mm in a 368 mm gap</dd>
         </dl>
@@ -424,32 +424,30 @@
       return `<tr class="${done ? 'done' : ''}">
         <td>${esc(p.stl.replace('.stl', ''))}</td>
         <td><span class="swatch sw-${p.colour}"></span>${p.colour}</td>
+        <td>${esc(info.size || '')}</td>
         <td class="r">${info.g} g</td>
-        <td class="r">${hours(info.min)}</td>
         <td>${done ? 'printed' : ''}</td>
       </tr>`;
     }).join('');
-    const sum = list => list.reduce((a, p) => [a[0] + PRINT_INFO[p.id].g, a[1] + PRINT_INFO[p.id].min], [0, 0]);
-    const [g, m] = sum(PARTS.filter(p => p.kind === 'print' && !p.test));
+    const g = PARTS.filter(p => p.kind === 'print' && !p.test).reduce((a, p) => a + PRINT_INFO[p.id].g, 0);
     return `<div class="ref-grid">
       <div>
         <div class="table-wrap"><table class="ptable">
-          <thead><tr><th>File</th><th>Colour</th><th class="r">PLA</th><th class="r">Time</th><th></th></tr></thead>
+          <thead><tr><th>File</th><th>Colour</th><th>Size, mm</th><th class="r">PLA</th><th></th></tr></thead>
           <tbody>${rows}</tbody>
-          <tfoot><tr><td colspan="2">Clock parts, without tests</td><td class="r">${g} g</td><td class="r">${hours(m)}</td><td></td></tr></tfoot>
+          <tfoot><tr><td colspan="3">Clock parts, without tests</td><td class="r">${g} g</td><td></td></tr></tfoot>
         </table></div>
-        <p class="fine">CuraEngine 5.13 slice with these settings, without heat-up.</p>
+        <p class="fine">Solid volume × 1.24 g/cm³. The parts are thin, so infill hardly matters. Bambu Studio gives the time when you slice.</p>
       </div>
       <div>
-        <h3>Cura, Ultimaker 3</h3>
+        <h3>Bambu Studio, H2C</h3>
         <dl class="specs">
-          <dt>Extruder</dt><dd>Single (disable extruder 2), left, AA 0.4. Prime tower off</dd>
-          <dt>Filament</dt><dd>2.85 mm PLA</dd>
-          <dt>Layers</dt><dd>0.2 mm, 20 % infill</dd>
-          <dt>Brim</dt><dd>1.2 mm, initial layer width 100 %</dd>
-          <dt>Travel avoid</dt><dd>1 mm</dd>
-          <dt>Placement</dt><dd>X −12, Y −1, Z 0 from bed centre (Y +1 with Flip Y)</dd>
-          <dt>Orientation</dt><dd>As exported, 100 %. Don’t mirror: the faceplates are mirrored on purpose</dd>
+          <dt>Plates</dt><dd>One tile per plate; splines and samples share one. Biggest tile 242 × 225 mm, any nozzle</dd>
+          <dt>Filament</dt><dd>1.75 mm PLA, one per plate: no flushing, no prime tower</dd>
+          <dt>Process</dt><dd>0.20 mm Standard, 0.4 nozzle, 20 % infill</dd>
+          <dt>Build plate</dt><dd>Smooth PEI or Cool Plate for a smooth face; textured PEI gives a textured face</dd>
+          <dt>Walls</dt><dd>Detect thin wall on, so the 0.8 mm seam half-walls print</dd>
+          <dt>Orientation</dt><dd>As exported, 100 %. No auto-orient, don’t mirror: the faceplates are mirrored on purpose</dd>
         </dl>
       </div>
     </div>`;

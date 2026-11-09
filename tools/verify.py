@@ -5,12 +5,11 @@ Run after qlock.py: python tools/verify.py
 """
 import argparse
 import json
-from pathlib import Path
 
 import numpy as np
 import trimesh
 from shapely.affinity import scale, translate
-from shapely.geometry import Point, Polygon, box
+from shapely.geometry import Polygon, box
 from shapely.ops import unary_union
 
 import qlock as q
@@ -28,17 +27,14 @@ def from_front(shape):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--cura-resources', type=Path,
-                        help='Cura resources folder containing definitions/ and extruders/')
-    args = parser.parse_args()
+    argparse.ArgumentParser(description=__doc__).parse_args()
     meshes = {}
     for path in sorted(q.OUT.rglob('*.stl')):
         mesh = trimesh.load_mesh(path)
         assert mesh.is_watertight and mesh.is_winding_consistent, path
         assert mesh.volume > 0 and abs(mesh.bounds[0, 2]) < 1e-5, path
-        assert max(mesh.extents[:2]) + 2 * q.BRIM <= q.BED, path
-        expected_bodies = 10 if path.stem == 'splines_x10' else 1
+        assert q.fits_bed(*mesh.extents[:2]), path
+        expected_bodies = q.SPLINES if path.stem == f'splines_x{q.SPLINES}' else 1
         assert len(mesh.split()) == expected_bodies, path
         meshes[str(path.relative_to(q.OUT).with_suffix(''))] = mesh
     assert len(meshes) == 12
@@ -89,37 +85,17 @@ def main():
         rings = [polygon.exterior, *polygon.interiors]
         paths.append(' '.join('M ' + ' L '.join(f'{x:.4f},{y:.4f}' for x, y in ring.coords) + ' Z'
                               for ring in rings))
-    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 386 386">'
+    P = f'{q.PLATE:g}'
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-5 -5 {q.PLATE + 10:g} {q.PLATE + 10:g}">'
            '<title>QLOCK: smooth front, verified from exported STLs</title>'
-           '<rect x="-5" y="-5" width="386" height="386" fill="white"/>'
-           '<g transform="translate(0,376) scale(1,-1)" fill="#222" fill-rule="evenodd">'
+           f'<rect x="-5" y="-5" width="{q.PLATE + 10:g}" height="{q.PLATE + 10:g}" fill="white"/>'
+           f'<g transform="translate(0,{P}) scale(1,-1)" fill="#222" fill-rule="evenodd">'
            + ''.join(f'<path d="{p}"/>' for p in paths) + '</g></svg>')
     (q.ROOT / 'reference/front-preview.svg').write_text(svg)
-    print('PASS: 12 valid STLs; expected connected bodies; nominal bed dimensions including 1.2 mm brim.')
+    print(f'PASS: 12 valid STLs; expected connected bodies; all fit the H2C bed '
+          f'({q.BED[0]:g} x {q.BED[1]:g}) with a {q.BRIM:g} mm brim.')
     print('PASS: readable smooth front; rear pockets; all 110 glyphs clear their cells; tile labels.')
     print('Preview: reference/front-preview.svg')
-    if args.cura_resources:
-        definition = json.loads((args.cura_resources / 'definitions/ultimaker3.def.json').read_text())
-        left = json.loads((args.cura_resources / 'extruders/ultimaker3_extruder_left.def.json').read_text())
-        right = json.loads((args.cura_resources / 'extruders/ultimaker3_extruder_right.def.json').read_text())
-        overrides = definition['overrides']
-        width = overrides['machine_width']['default_value']
-        depth = overrides['machine_depth']['default_value']
-        offset = right['overrides']['machine_nozzle_offset_x']['default_value']
-        bed = box(-width / 2, -depth / 2, width / 2 - offset, depth / 2)
-        prime_x = left['overrides']['extruder_prime_pos_x']['default_value'] - width / 2
-        prime_y = depth / 2 - left['overrides']['extruder_prime_pos_y']['default_value']
-        excluded = unary_union([
-            *[Polygon(p) for p in overrides['machine_disallowed_areas']['default_value']],
-            Point(prime_x, prime_y).buffer(6.5),  # Cura 5.13 BuildVolume.PRIME_CLEARANCE
-        ])
-        for name, mesh in meshes.items():
-            x, y = mesh.extents[:2]
-            # README Move X=-12,Y=-1 (default, unflipped UI); include 0.2 mm allowance.
-            pad = q.BRIM + 0.2
-            footprint = box(-12-x/2-pad, -1-y/2-pad, -12+x/2+pad, -1+y/2+pad)
-            assert bed.contains(footprint) and not footprint.intersects(excluded), name
-        print('PASS: stock UM3 left-extruder reach, clip keep-outs and prime blob; 1.2 mm brim at X=-12,Y=-1.')
 
 
 if __name__ == '__main__':
