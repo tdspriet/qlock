@@ -5,25 +5,25 @@ const TT = 'https://www.tinytronics.nl/en/';
 const WIRE = TT + 'cables-and-connectors/cables-and-adapters/prototyping-wires/loose-wires/wire-single-core-flexible-%C3%B82.15mm-0.5mm2-';
 
 const SHOP = [
-  { name: 'Electronics', where: 'one order at TinyTronics, plus about €9 shipping', items: [
-    { id: 'esp32', n: '1', t: 'ESP32 board, CP2102', eur: 9, url: TT + 'development-boards/microcontroller-boards/with-wi-fi/esp32-wifi-and-bluetooth-board-cp2102' },
-    { id: 'strip', n: '5', t: 'WS2812B LED strip, 30 LEDs/m, 1 m', eur: 42.5, url: TT + 'lighting/led-strips/led-strips/ws2812b-digital-5050-rgb-led-strip-30-leds-1m' },
-    { id: 'shifter', n: '1', t: 'SN74AHCT125N level shifter', eur: 1, url: TT + 'components/ics-and-microcontroller-chips/ics/sn74ahct125n-4-channel-level-converter-3.3v-to-5v-14-pin-dip' },
+  { name: 'Electronics', where: 'TinyTronics, plus €9.49 shipping. The LED reel and the 100 nF come from Amazon.de', items: [
+    { id: 'esp32', n: '1', t: 'ESP32-D0WDQ6 board', eur: 7, url: TT + 'development-boards/microcontroller-boards/with-wi-fi/esp32-d0wdq6-development-board-with-wi-fi-and-bluetooth' },
+    { id: 'strip', n: '1', t: 'WS2812B LED strip, 30 LEDs/m, 5 m reel, white, IP30 (Amazon)', eur: 27.99, url: 'https://www.amazon.de/dp/B01CDTE9AW' },
+    { id: 'shifter', n: '2', t: 'SN74AHCT125N level shifter (one spare)', eur: 2, url: TT + 'components/ics-and-microcontroller-chips/ics/sn74ahct125n-4-channel-level-converter-3.3v-to-5v-14-pin-dip' },
     { id: 'socket', n: '1', t: '14-pin IC socket', eur: 0.35, url: TT + 'components/sockets/14-pins-ic-socket' },
     { id: 'pcb', n: '1', t: 'Experiment PCB 5 × 7 cm', eur: 0.8, url: TT + 'tools-and-mounting/prototyping-supplies/experiment-pcbs/experiment-pcb-5cm*7cm-double-sided' },
     { id: 'psu', n: '1', t: '5 V / 4 A power adapter', eur: 10.5, url: TT + 'power/power-supplies/5v/sunshine-power-adapter-with-dc-jack-5.5-2.1mm-5v-4a' },
     { id: 'jack', n: '1', t: 'DC jack to screw terminals', eur: 1, url: TT + 'cables-and-connectors/connectors/screw-terminals/dc-jack-female-5.5mm-to-terminal-block' },
     { id: 'cap', n: '1', t: '2200 µF 25 V capacitor', eur: 0.5, url: TT + 'components/capacitors/aishi-elektrolytic-capacitor-2200uf-25v' },
-    { id: 'cap100n', n: '2', t: '100 nF ceramic capacitor', eur: 0.2, url: TT + 'components/capacitors/ceramic-capacitor-100nf-50v' },
+    { id: 'cap100n', n: '1', t: '100 nF ceramic capacitors, bag of 150 (Amazon)', eur: 5.59, url: 'https://www.amazon.de/dp/B0GWMVTD1H' },
     { id: 'resistors', n: '1', t: 'Resistor set (470 Ω and 10 kΩ)', eur: 5, url: TT + 'components/resistors/resistors/10%CF%89-1m%CF%89-resistor-set' },
     { id: 'plug', n: '2', t: 'JST-XH 3-pin plug with cable and socket', eur: 1.2, url: TT + 'cables-and-connectors/cables-and-adapters/jst-compatible/jst-xh-connector-with-cable-and-pcb-connector-3-pins' },
     { id: 'wire-red', n: '4 m', t: 'Wire 0.5 mm², red', eur: 4, url: WIRE + 'red-1m' },
     { id: 'wire-black', n: '4 m', t: 'Wire 0.5 mm², black', eur: 4, url: WIRE + 'black-1m' },
     { id: 'wire-yellow', n: '3 m', t: 'Wire 0.5 mm², yellow', eur: 3, url: WIRE + 'yellow-1m' },
     { id: 'shrink', n: '1', t: 'Heat shrink kit', eur: 4, url: TT + 'tools-and-mounting/installation-and-mounting-material/heat-shrink-tubing/heat-shrink-tubing-kit-black' },
-    { id: 'usb', n: '1', t: 'Micro-USB data cable', eur: 2.25, url: TT + 'cables-and-connectors/cables-and-adapters/usb/micro-usb/goobay-93918-micro-usb-cable-1m-black' },
+    { id: 'usb', n: '1', t: 'Micro-USB data cable (USB-A plug)', eur: 2.25, url: TT + 'cables-and-connectors/cables-and-adapters/usb/micro-usb/goobay-93918-micro-usb-cable-1m-black' },
   ] },
-  { name: 'Tools', where: 'same order. Tick what you can borrow', items: [
+  { name: 'Tools', where: 'in the TinyTronics order. Tick what you can borrow', items: [
     { id: 'iron', n: '1', t: 'Soldering iron, Atten ST-2065D', eur: 28.75, url: TT + 'tools-and-mounting/tools/soldering-irons-and-stations/atten-st-2065d-soldering-iron-65w-adjustable-temperature' },
     { id: 'tip', n: '1', t: 'Chisel tip for the iron', eur: 4, url: TT + 'tools-and-mounting/soldering/soldering-tips/solder-tip-for-atten-st-2065d-chisel-1.6mm' },
     { id: 'solder', n: '1', t: 'Solder 0.7 mm, 100 g, leaded', eur: 10.5, url: TT + 'tools-and-mounting/soldering/consumables/solder-wire/premium-solder-wire-0.7mm-100g' },
@@ -48,7 +48,7 @@ const SHOP = [
 
 const PHASES = [
   { id: 'buy', name: 'Buy', shop: true,
-    intro: 'Buy the five LED strips in one go so the whites match.' },
+    intro: 'Two orders: TinyTronics, and Amazon.de for the LED reel and the 100 nF capacitors.' },
 
   { id: 'sample', name: 'Print the sample',
     intro: 'A small corner of the clock. Bambu Studio, 0.20 mm Standard, PLA. Files are in stl/.',
@@ -67,20 +67,20 @@ const PHASES = [
       { id: 'c-polarity', t: 'Check the adapter with the multimeter',
         h: 'Adapter into the DC jack. The screw terminal marked + must read +5 V.' },
       { id: 'c-board', t: 'Solder the controller board',
-        h: 'Follow the picture below. The 100 nF goes straight across chip pins 14 and 7.' },
+        h: 'Follow the picture below. The 100 nF goes straight across chip pins 14 and 7. Lay the big capacitor on its side.' },
       { id: 'c-plug', t: 'Solder the plug cable to the ESP32',
-        h: 'Three wires, to the pins marked VIN, GND and 16 (D16 or RX2). Mark which is which.' },
+        h: 'Three wires, to the tips of the pins marked 5.0V, GND and GP16, with heat shrink over each. Mark which is which.' },
       { id: 'c-ide', t: 'Set up the Arduino IDE',
         h: 'Install esp32 (3.3.x) and FastLED (3.10.9 or newer). Board: ESP32 Dev Module. Apple-silicon Mac: install Rosetta first, see the README.' },
       { id: 'c-flash', t: 'Upload led_test.ino to the ESP32',
-        h: 'If it hangs on “Connecting…”, hold the BOOT button.' },
+        h: 'If it hangs on “Connecting…”, hold a wire between GP0 and GND, press RST, and let go when the upload starts.' },
     ] },
 
   { id: 'test', name: 'Test the sample',
     intro: 'Five LEDs behind J F / O R and the dot. Nothing glued. Judge it in a dim room.',
     steps: [
       { id: 't-leds', t: 'Stick five spare LEDs on a board, under the sample',
-        h: 'Two strips of two under J F and O R, a single one under the dot. Mark the box centres through the grid.' },
+        h: 'Cut the first two 15-LED sections off the reel: each is a row of 11 for later and 4 left over. From those: two strips of two under J F and O R, a single one under the dot.' },
       { id: 't-wire', t: 'Wire them J → F → R → O → dot, and power up',
         h: 'Follow the arrows on the strip. Red +5 V, black GND, yellow data. Each LED lights in turn, then all five.' },
       { id: 't-even', t: 'The letters glow evenly',
@@ -104,7 +104,7 @@ const PHASES = [
       { id: 'p-cut', t: 'Cut the plywood to 450 × 450 mm and draw ten row lines',
         h: 'From the top edge: 60, 96.7, 133.3, 170, 206.7, 243.3, 280, 316.7, 353.3 and 390 mm.' },
       { id: 'p-strips', t: 'Cut ten strips of 11 LEDs',
-        h: 'Through the middle of the copper pads.' },
+        h: 'One from each 15-LED section of the reel, so no row has a factory solder joint in it. Cut through the middle of the copper pads.' },
       { id: 'p-stick', t: 'Stick the rows on the lines',
         h: 'Middle of the first LED 58.3 mm from the left edge. Arrows point right on the top row, left on the next, and so on.' },
       { id: 'p-dots', t: 'Stick one LED in each corner',

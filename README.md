@@ -29,33 +29,34 @@ The build in order. Tick things off on the tracker: `python3 site/serve.py`.
 
 ## 1. Buy
 
-**Electronics, one order at [TinyTronics](https://www.tinytronics.nl/en)**
-(about €90, plus about €9 shipping to Belgium). Checked 9 Nov 2026.
+**Electronics, two orders** (about €80): [TinyTronics](https://www.tinytronics.nl/en),
+plus €9.49 shipping to Belgium, and Amazon.de for the two parts TinyTronics
+had no stock of. Ordered 11 Nov 2026.
 
 | # | What | € |
 |---|---|---|
-| 1 | [ESP32 board, CP2102](https://www.tinytronics.nl/en/development-boards/microcontroller-boards/with-wi-fi/esp32-wifi-and-bluetooth-board-cp2102) (micro-USB) | 9.00 |
-| 5 | [WS2812B LED strip, 30 LEDs/m, 1 m](https://www.tinytronics.nl/en/lighting/led-strips/led-strips/ws2812b-digital-5050-rgb-led-strip-30-leds-1m) | 42.50 |
-| 1 | [SN74AHCT125N level shifter](https://www.tinytronics.nl/en/components/ics-and-microcontroller-chips/ics/sn74ahct125n-4-channel-level-converter-3.3v-to-5v-14-pin-dip) | 1.00 |
+| 1 | [ESP32-D0WDQ6 board](https://www.tinytronics.nl/en/development-boards/microcontroller-boards/with-wi-fi/esp32-d0wdq6-development-board-with-wi-fi-and-bluetooth) (micro-USB) | 7.00 |
+| 1 | [WS2812B LED strip, 30 LEDs/m, 5 m reel](https://www.amazon.de/dp/B01CDTE9AW), white PCB, IP30 (Amazon) | 27.99 |
+| 2 | [SN74AHCT125N level shifter](https://www.tinytronics.nl/en/components/ics-and-microcontroller-chips/ics/sn74ahct125n-4-channel-level-converter-3.3v-to-5v-14-pin-dip) (one spare) | 2.00 |
 | 1 | [14-pin IC socket](https://www.tinytronics.nl/en/components/sockets/14-pins-ic-socket) | 0.35 |
 | 1 | [Experiment PCB 5 × 7 cm](https://www.tinytronics.nl/en/tools-and-mounting/prototyping-supplies/experiment-pcbs/experiment-pcb-5cm*7cm-double-sided) | 0.80 |
 | 1 | [5 V / 4 A power adapter](https://www.tinytronics.nl/en/power/power-supplies/5v/sunshine-power-adapter-with-dc-jack-5.5-2.1mm-5v-4a) | 10.50 |
 | 1 | [DC jack to screw terminals](https://www.tinytronics.nl/en/cables-and-connectors/connectors/screw-terminals/dc-jack-female-5.5mm-to-terminal-block) | 1.00 |
 | 1 | [2200 µF 25 V capacitor](https://www.tinytronics.nl/en/components/capacitors/aishi-elektrolytic-capacitor-2200uf-25v) | 0.50 |
-| 2 | [100 nF ceramic capacitor](https://www.tinytronics.nl/en/components/capacitors/ceramic-capacitor-100nf-50v) (one spare) | 0.20 |
+| 1 | [100 nF ceramic capacitors](https://www.amazon.de/dp/B0GWMVTD1H), a bag of 150: you need one (Amazon) | 5.59 |
 | 1 | [Resistor set](https://www.tinytronics.nl/en/components/resistors/resistors/10%CF%89-1m%CF%89-resistor-set) (you need one 470 Ω and one 10 kΩ) | 5.00 |
 | 2 | [JST-XH 3-pin plug with cable and socket](https://www.tinytronics.nl/en/cables-and-connectors/cables-and-adapters/jst-compatible/jst-xh-connector-with-cable-and-pcb-connector-3-pins) (one spare) | 1.20 |
 | 4 m | [Wire 0.5 mm², red](https://www.tinytronics.nl/en/cables-and-connectors/cables-and-adapters/prototyping-wires/loose-wires/wire-single-core-flexible-%C3%B82.15mm-0.5mm2-red-1m) | 4.00 |
 | 4 m | [Wire 0.5 mm², black](https://www.tinytronics.nl/en/cables-and-connectors/cables-and-adapters/prototyping-wires/loose-wires/wire-single-core-flexible-%C3%B82.15mm-0.5mm2-black-1m) | 4.00 |
 | 3 m | [Wire 0.5 mm², yellow](https://www.tinytronics.nl/en/cables-and-connectors/cables-and-adapters/prototyping-wires/loose-wires/wire-single-core-flexible-%C3%B82.15mm-0.5mm2-yellow-1m) | 3.00 |
 | 1 | [Heat shrink kit](https://www.tinytronics.nl/en/tools-and-mounting/installation-and-mounting-material/heat-shrink-tubing/heat-shrink-tubing-kit-black) | 4.00 |
-| 1 | [Micro-USB data cable](https://www.tinytronics.nl/en/cables-and-connectors/cables-and-adapters/usb/micro-usb/goobay-93918-micro-usb-cable-1m-black), if you have none | 2.25 |
+| 1 | [Micro-USB data cable](https://www.tinytronics.nl/en/cables-and-connectors/cables-and-adapters/usb/micro-usb/goobay-93918-micro-usb-cable-1m-black). It has a USB-A plug: a MacBook needs a hub or adapter | 2.25 |
 
-Buy all five strips in one go so the whites match. Five metres is exact: each
-metre gives two rows of 11 and 8 spare LEDs, and the dots and the sample come
-out of the spares.
+One reel, so the whites match. It is ten sections of 15 LEDs, soldered end to
+end. Each section gives one row of 11 with no solder joint in it, and 4 left
+over: the dots, the sample and 31 spares.
 
-**Tools, same order** (about €92, skip what you can borrow)
+**Tools, in the TinyTronics order** (about €92, skip what you can borrow)
 
 | What | € |
 |---|---|
@@ -123,7 +124,7 @@ and lifts the ESP32's 3.3 V data signal to 5 V.
 
 ```
 adapter ── DC jack ─┬─ +5 V ─┬─ 2200 µF ─┬─ chip pin 14 ───────────── strip +5 V   (red)
-                    │        │  (stripe  └─ plug ─ ESP32 VIN
+                    │        │  (stripe  └─ plug ─ ESP32 5.0V
                     │        │   to GND)
                     └─ GND ──┴───────────┬─ chip pin 7 ────────────── strip GND    (black)
                                          └─ plug ─ ESP32 GND
@@ -133,7 +134,8 @@ ESP32 GPIO16 ─ plug ─ chip pin 2 (and 10 kΩ from pin 2 to GND)
 ```
 
 On the experiment PCB: the IC socket, the JST socket, both resistors and both
-capacitors. The chip is the SN74AHCT125N; pin 1 is left of the notch, counting
+capacitors. Lay the big capacitor on its side: standing up it is too tall for
+the frame. The chip is the SN74AHCT125N; pin 1 is left of the notch, counting
 goes anticlockwise.
 
 | Chip pin | Goes to |
@@ -147,7 +149,8 @@ goes anticlockwise.
 Solder the 100 nF capacitor straight across pins 14 and 7.
 
 **The plug.** The JST cable goes to the ESP32: solder its three wires to the
-pins marked VIN, GND and 16 (labelled D16 or RX2). The JST socket sits on the
+tips of the pins marked 5.0V, GND and GP16, with a bit of heat shrink over
+each. The JST socket sits on the
 board. Mark which wire is which and check it with the multimeter.
 
 **Before you connect anything:** plug the adapter into the DC jack and measure
@@ -165,7 +168,8 @@ The ESP32 is flashed over USB on its own, then plugged back into the clock.
 3. Tools > Board > **ESP32 Dev Module**. Pick the port that appears when you
    plug in the board.
 4. Open `firmware/led_test/led_test.ino` and press Upload. If it hangs on
-   "Connecting...", hold the BOOT button on the board.
+   "Connecting...": this board has no BOOT button, so hold a wire between
+   GP0 and GND, press RST, and let go when the upload starts.
 
 ## 4. Test the sample
 
@@ -175,7 +179,9 @@ you print a kilo of plastic.
 
 1. Put the sample grid on a piece of board, notches down, and mark the middle
    of the four letter boxes and of the corner box.
-2. Cut five spare LEDs: two strips of two, and one single. Cut through the
+2. Cut the first two sections off the reel, at the factory solder joints
+   (side cutters). Cut each into a row of 11, to keep for step 6, and 4 left
+   over. From those: two strips of two, and one single. Cut through the
    middle of the copper pads. Stick them on the marks, LEDs facing up. Seen
    from above this is the front view: J F on top, O R below, the dot top-right.
 3. Wire them in this order: **J → F → R → O → dot**. The arrows on the strip
@@ -206,7 +212,8 @@ LED side, and you are looking at the clock from the front. H is top-left.
 
 1. **Draw ten row lines**, measured from the top edge: 60, 96.7, 133.3, 170,
    206.7, 243.3, 280, 316.7, 353.3 and 390 mm.
-2. **Cut ten strips of 11 LEDs.** Each is 366.7 mm.
+2. **Cut ten strips of 11 LEDs**, one from each 15-LED section of the reel.
+   Each is 366.7 mm. Cut off the plugs at both ends of the reel.
 3. **Stick them on the lines**, with the middle of the first LED 58.3 mm
    from the left edge. Top row: arrows point right. Next row: arrows point
    left. Keep alternating. Stay within 1 mm of the line.
