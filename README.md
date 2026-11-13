@@ -1,7 +1,7 @@
 # QLOCK
 
 A 45 × 45 cm Dutch word clock, QLOCKTWO style. 110 letters and four minute
-dots, one LED behind each, printed on the Bambu Lab H2C and run by an ESP32
+dots, one LED behind each, printed on the Bambu Lab H2D and run by an ESP32
 that gets the time over Wi-Fi.
 
 <img src="stl/preview.svg" width="360" alt="The front of the clock">
@@ -86,7 +86,7 @@ at €22.50 each.
 
 ## 2. Print the sample
 
-Bambu Studio, H2C, 0.4 mm nozzle, **0.20 mm Standard**, PLA. The files are in
+Bambu Studio, H2D, 0.4 mm nozzle, **0.20 mm Standard**, PLA. The files are in
 `stl/`.
 
 | Print | Files | Filament |
@@ -107,7 +107,7 @@ sliced preview, layer 1 must show every letter filled in white.
   is fine.
 - TL, TR, BL, BR say where a tile sits **seen from the front**.
 - The build plate's surface becomes the front of the clock. The textured
-  plate that comes with the H2C gives a fine matte face. Judge it on the
+  plate that comes with the H2D gives a fine matte face. Judge it on the
   sample.
 - Two-colour plates must sit in the area both nozzles reach (300 × 320 mm),
   prime tower included. Every faceplate fits.

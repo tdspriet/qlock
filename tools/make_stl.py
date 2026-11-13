@@ -37,10 +37,10 @@ RIM_T = 4.0                 # outer rim of the grid
 STRIP_W, STRIP_H = 12.0, 2.5   # slot where the LED strip passes under a wall
 WIRE_W, WIRE_H = 7.5, 3.5      # notch for three 0.5 mm2 wires; WIRE_H also at the strip ends
 
-# Bambu Lab H2C. One-colour parts must fit the smaller (right) nozzle area with
+# Bambu Lab H2D. One-colour parts must fit one nozzle's area (325 x 320) with
 # a brim. Two-colour parts must fit the area both nozzles reach, next to a
 # prime tower.
-BED_ONE, BRIM = (305.0, 320.0), 5.0
+BED_ONE, BRIM = (325.0, 320.0), 5.0
 BED_TWO, TOWER = (300.0, 320.0), 45.0
 
 # ------------------------------------------------------------------- layout
@@ -252,7 +252,7 @@ def main():
         x, y, z = m.extents
         print(f"{name:<28} {x:6.1f} {y:6.1f} {z:5.1f}  {g:4.0f} g")
     print(f"\nclock without samples: {grams['black']:.0f} g black, {grams['white']:.0f} g white")
-    print("all checks passed: solid, fits the H2C, front reads correctly, white fills every "
+    print("all checks passed: solid, fits the H2D, front reads correctly, white fills every "
           "letter,\nno wall crosses a letter, tile names match. Preview: stl/preview.svg")
 
 
